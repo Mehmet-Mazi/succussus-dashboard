@@ -16,14 +16,18 @@ const formSchema = z.object({
   remember: z.boolean().optional(),
 });
 
-function onSubmit(data: z.infer<typeof formSchema>) {
-  toast("You submitted the following values", {
-    description: (
-      <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-        <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-      </pre>
-    ),
-  });
+interface AuthenticatedUser {
+  id: string;
+  userName: string;
+  email: string;
+  companyRole: string;
+  team: string;
+  systemRole: string;
+}
+
+interface LoginResponse {
+  message?: string;
+  user?: AuthenticatedUser;
 }
 
 export function LoginForm() {
@@ -35,6 +39,42 @@ export function LoginForm() {
       remember: false,
     },
   });
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    form.clearErrors("root");
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      const result = (await response.json()) as LoginResponse;
+
+      if (!response.ok || !result.user) {
+        form.setError("root", {
+          message: result.message ?? "Unable to sign in. Please try again.",
+        });
+        return;
+      }
+
+      toast.success(`Welcome back, ${result.user.userName}`, {
+        description: (
+          <div className="mt-2 space-y-1 text-sm">
+            <div>{result.user.email}</div>
+            <div>{result.user.companyRole}</div>
+            <div>
+              {result.user.team} · {result.user.systemRole}
+            </div>
+          </div>
+        ),
+      });
+    } catch {
+      form.setError("root", {
+        message: "Unable to reach the login service. Please try again.",
+      });
+    }
+  }
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -97,8 +137,13 @@ export function LoginForm() {
           )}
         />
       </FieldGroup>
-      <Button className="w-full" type="submit">
-        Login
+      {form.formState.errors.root?.message && (
+        <p className="text-destructive text-sm" role="alert">
+          {form.formState.errors.root.message}
+        </p>
+      )}
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
+        {form.formState.isSubmitting ? "Signing in..." : "Login"}
       </Button>
     </form>
   );
