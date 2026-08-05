@@ -158,7 +158,30 @@ export function TimesheetSubmissions() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-44">
-                  {/* 保留你现有的 All stages 和各 Stage 选项代码 */}
+                  <DropdownMenuGroup>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedStages.length === timesheetStages.length}
+                      onCheckedChange={toggleAllStages}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      All stages
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuGroup>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuGroup>
+                    {timesheetStages.map((stage) => (
+                      <DropdownMenuCheckboxItem
+                        key={stage}
+                        checked={selectedStages.includes(stage)}
+                        onCheckedChange={() => toggleStage(stage)}
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        {stage}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
