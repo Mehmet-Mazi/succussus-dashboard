@@ -6,6 +6,7 @@ import {
   Fingerprint,
   FolderOpen,
   Forklift,
+  ChartGantt,//new icon
   Gauge,
   GraduationCap,
   Kanban,
@@ -70,6 +71,18 @@ export const sidebarItems: NavGroup[] = [
         title: "Default",
         url: "/dashboard/default",
         icon: LayoutDashboard,
+      },
+      {// new sheet added to the sidebar
+        id: "timesheets",
+        title: "Timesheets",
+        url: "/dashboard/timesheets",
+        icon: ChartGantt,
+      },
+      {// new sheet added to the sidebar
+        id: "invoices",
+        title: "Invoices",
+        url: "/dashboard/invoices",
+        icon: ReceiptText,
       },
       {
         id: "crm",
