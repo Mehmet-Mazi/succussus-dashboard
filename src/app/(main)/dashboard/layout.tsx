@@ -1,23 +1,61 @@
 import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
-
+import {
+  AUTH_MODE_COOKIE_NAME,
+  AUTH_USERNAME_COOKIE_NAME,
+} from "@/lib/auth/auth.constants";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
-
+import { testUsers } from "@/data/test_users";
 import { AccountSwitcher } from "./_components/header/account-switcher";
 import { GitHubRepositoriesMenu } from "./_components/header/github-repositories-menu";
 import { LayoutControls } from "./_components/header/layout-controls";
 import { SearchDialog } from "./_components/header/search-dialog";
 import { ThemeSwitcher } from "./_components/header/theme-switcher";
+import {
+  MOCK_ROLE_COOKIE_NAME,
+  MOCK_USER_ID_COOKIE_NAME,
+  parseAppRole,
+} from "@/lib/access-control/role-access.data";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+  const role = parseAppRole(
+    cookieStore.get(MOCK_ROLE_COOKIE_NAME)?.value,
+  );
+  const currentUserId = cookieStore.get(
+  MOCK_USER_ID_COOKIE_NAME,
+)?.value;
+
+  const authMode = cookieStore.get(
+    AUTH_MODE_COOKIE_NAME,
+  )?.value;
+
+  const authenticatedUsername = cookieStore.get(
+    AUTH_USERNAME_COOKIE_NAME,
+  )?.value;
+
+  const localUser =
+    authMode === "mock"
+      ? testUsers.find((user) => user.id === currentUserId)
+      : undefined;
+
+  const currentUser = {
+    name:
+      localUser?.userName ??
+      authenticatedUsername ??
+      "Unknown User",
+    email:
+      localUser?.email ??
+      authenticatedUsername ??
+      "",
+    avatar: "",
+  };
   const [variant, collapsible] = await Promise.all([
     getPreference("sidebar_variant"),
     getPreference("sidebar_collapsible"),
@@ -32,7 +70,13 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant={variant} collapsible={collapsible} />
+      {/* <AppSidebar variant={variant} collapsible={collapsible} /> */}
+      <AppSidebar
+        variant={variant}
+        collapsible={collapsible}
+        role={role ?? "guest"}
+        user={currentUser}
+      />
       <SidebarInset
         className={cn(
           "[html[data-content-layout=centered]_&>*]:mx-auto",
@@ -57,13 +101,13 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
                 orientation="vertical"
                 className="mx-2 data-[orientation=vertical]:h-4 data-[orientation=vertical]:self-center"
               />
-              <SearchDialog />
+              <SearchDialog role={role ?? "guest"} />
             </div>
             <div className="flex items-center gap-2">
               <LayoutControls />
               <ThemeSwitcher />
               <GitHubRepositoriesMenu />
-              <AccountSwitcher users={users} />
+              <AccountSwitcher user={currentUser} />
             </div>
           </div>
         </header>

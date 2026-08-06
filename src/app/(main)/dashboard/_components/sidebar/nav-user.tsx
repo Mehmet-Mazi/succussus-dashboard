@@ -15,17 +15,21 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { getInitials } from "@/lib/utils";
 
+import { useLogout } from "../use-logout";
+
+export interface NavUserData {
+  readonly name: string;
+  readonly email: string;
+  readonly avatar: string;
+}
+
 export function NavUser({
   user,
 }: {
-  readonly user: {
-    readonly name: string;
-    readonly email: string;
-    readonly avatar: string;
-  };
+  readonly user: NavUserData;
 }) {
   const { isMobile } = useSidebar();
-
+  const { isLoggingOut, logout } = useLogout();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -80,9 +84,12 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isLoggingOut}
+              onSelect={() => void logout()}
+            >
               <LogOut />
-              Log out
+              {isLoggingOut ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

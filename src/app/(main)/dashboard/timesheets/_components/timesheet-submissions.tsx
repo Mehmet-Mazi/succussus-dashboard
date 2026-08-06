@@ -192,13 +192,13 @@ export function TimesheetSubmissions() {
           <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4 **:data-[slot='table-cell']:py-4">
             <TableHeader className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground">
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Target Week</TableHead>
-                <TableHead>Uploader Name</TableHead>
-                <TableHead>Submitted Date</TableHead>
-                <TableHead className="text-right">Total Drivers</TableHead>
-                <TableHead className="text-right">Total Stops</TableHead>
-                <TableHead className="text-right">Earnings</TableHead>
+                <TableHead className="text-center">ID</TableHead>
+                <TableHead className="text-center">Target Week</TableHead>
+                <TableHead className="text-center">Uploader Name</TableHead>
+                <TableHead className="text-center">Submitted Date</TableHead>
+                <TableHead className="text-center">Total Drivers</TableHead>
+                <TableHead className="text-center">Total Stops</TableHead>
+                <TableHead className="text-center">Earnings</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -206,12 +206,12 @@ export function TimesheetSubmissions() {
               {visibleSubmissions.length > 0 ? (
                 visibleSubmissions.map((submission) => (
                   <TableRow key={submission.id}>
-                    <TableCell className="font-medium">{submission.id}</TableCell>
-                    <TableCell>{submission.targetWeek}</TableCell>
-                    <TableCell>{submission.uploaderName}</TableCell>
-                    <TableCell>{submission.submittedDate}</TableCell>
-                    <TableCell className="text-right tabular-nums">{submission.totalDrivers}</TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-center font-medium">{submission.id}</TableCell>
+                    <TableCell className="text-center">{submission.targetWeek}</TableCell>
+                    <TableCell className="text-center">{submission.uploaderName}</TableCell>
+                    <TableCell className="text-center">{submission.submittedDate}</TableCell>
+                    <TableCell className="text-center tabular-nums">{submission.totalDrivers}</TableCell>
+                    <TableCell className="text-center tabular-nums">
                       {submission.totalStops.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">{submission.earnings}</TableCell>

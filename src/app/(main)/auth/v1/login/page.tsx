@@ -30,13 +30,13 @@ export default function LoginV1() {
           </div>
           <div className="space-y-4">
             <LoginForm />
-            {/* <GoogleButton className="w-full" variant="outline" /> */}
+            {/* <GoogleButton className="w-full" variant="outline" />
             <p className="text-center text-muted-foreground text-xs">
               Don&apos;t have an account?{" "}
               <Link prefetch={false} href="register" className="text-primary">
                 Register
               </Link>
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

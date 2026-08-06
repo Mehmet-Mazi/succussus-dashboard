@@ -5,7 +5,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 
 import { Search } from "lucide-react";
-
+import type { AppRole } from "@/lib/access-control/role-access.data";
+import { filterSidebarItems } from "@/navigation/sidebar/filter-sidebar-items";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -17,8 +18,11 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import type { NavMainItem } from "@/navigation/sidebar/sidebar-items";
-import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+import {
+  sidebarItems,
+  type NavGroup,
+  type NavMainItem,
+} from "@/navigation/sidebar/sidebar-items";
 
 type SearchItem = {
   id: string;
@@ -30,44 +34,54 @@ type SearchItem = {
   newTab?: boolean;
 };
 
-const sidebarGroupLabels = new Set(sidebarItems.flatMap((group) => (group.label ? [group.label] : [])));
-
-function getSubItemGroup(groupLabel: string | undefined, itemTitle: string) {
-  return sidebarGroupLabels.has(itemTitle) ? (groupLabel ?? "Other") : itemTitle;
-}
-
-const searchItems: SearchItem[] = sidebarItems.flatMap((group) =>
-  group.items.flatMap((item) => {
-    if (item.subItems) {
-      return item.subItems.map((sub) => ({
-        id: sub.id,
-        group: getSubItemGroup(group.label, item.title),
-        label: sub.title,
-        url: sub.url,
-        icon: item.icon,
-        disabled: sub.disabled,
-        newTab: sub.newTab,
-      }));
-    }
-    return [
-      {
-        id: item.id,
-        group: group.label ?? "Other",
-        label: item.title,
-        url: item.url,
-        icon: item.icon,
-        disabled: item.disabled,
-        newTab: item.newTab,
-      },
-    ];
-  }),
-);
 
 function getAvailableItems(items: SearchItem[]) {
   return items.filter((item) => !item.disabled && !item.url.includes("coming-soon"));
 }
 
-const recommendations = getAvailableItems(searchItems);
+
+function createSearchItems(groups: readonly NavGroup[]): SearchItem[] {
+  const groupLabels = new Set(
+    groups.flatMap((group) => (group.label ? [group.label] : [])),
+  );
+
+  function getSubItemGroup(
+    groupLabel: string | undefined,
+    itemTitle: string,
+  ) {
+    return groupLabels.has(itemTitle)
+      ? (groupLabel ?? "Other")
+      : itemTitle;
+  }
+
+  return groups.flatMap((group) =>
+    group.items.flatMap((item) => {
+      if (item.subItems) {
+        return item.subItems.map((subItem) => ({
+          id: subItem.id,
+          group: getSubItemGroup(group.label, item.title),
+          label: subItem.title,
+          url: subItem.url,
+          icon: item.icon,
+          disabled: subItem.disabled,
+          newTab: subItem.newTab,
+        }));
+      }
+
+      return [
+        {
+          id: item.id,
+          group: group.label ?? "Other",
+          label: item.title,
+          url: item.url,
+          icon: item.icon,
+          disabled: item.disabled,
+          newTab: item.newTab,
+        },
+      ];
+    }),
+  );
+}
 
 function groupBy(items: SearchItem[]) {
   const groups = [...new Set(items.map((item) => item.group))];
@@ -77,10 +91,24 @@ function groupBy(items: SearchItem[]) {
   }));
 }
 
-export function SearchDialog() {
+interface SearchDialogProps {
+  readonly role: AppRole;
+}
+  
+export function SearchDialog({ role }: SearchDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const router = useRouter();
+
+  const { searchItems, recommendations } = React.useMemo(() => {
+    const permittedGroups = filterSidebarItems(sidebarItems, role);
+    const permittedSearchItems = createSearchItems(permittedGroups);
+
+    return {
+      searchItems: permittedSearchItems,
+      recommendations: getAvailableItems(permittedSearchItems),
+    };
+  }, [role]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
