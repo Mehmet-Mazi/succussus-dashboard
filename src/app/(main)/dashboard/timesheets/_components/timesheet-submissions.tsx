@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { type TimesheetSubmission, type Timesheetstatus, timesheetStatus } from "./data";
+import Rules from "./rules";
 
 export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubmission[] }) {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -38,7 +39,6 @@ export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubm
       return matchesSearch && selectedStatus.includes(submission.status);
     });
   }, [timesheets, searchQuery, selectedStatus]);
-  console.log(filteredSubmissions, timesheets);
 
   const pageCount = Math.max(1, Math.ceil(filteredSubmissions.length / pageSize));
   const currentPageIndex = Math.min(pageIndex, pageCount - 1);
@@ -118,6 +118,7 @@ export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubm
 
           <CardAction>
             <div className="flex flex-wrap items-center justify-end gap-2">
+              <Rules/>
               <Button type="button" size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
                 <Upload data-icon="inline-start" />
                 {isUploading ? "Uploading..." : "Upload"}

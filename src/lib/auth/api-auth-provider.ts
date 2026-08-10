@@ -7,7 +7,7 @@ import type {
 import { resolveAppRole } from "./resolve-app-role";
 
 const tokenEndpoint =
-  "https://successus-platform.onrender.com/api/token/";
+  `${process.env.API_URL}/api/token/`;
 
 const tokenResponseSchema = z.object({
   access: z.string().min(1),

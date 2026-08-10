@@ -10,7 +10,7 @@ async function getTimesheets(): Promise<TimesheetSubmission[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token")?.value;
   console.log("cookieStore:", accessToken);
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/timesheets/", {
+  const response = await fetch(process.env.API_URL + "/timesheets/", {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
