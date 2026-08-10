@@ -55,14 +55,14 @@ function defineSSRPreference<
 export const PREFERENCE_REGISTRY = {
   theme_mode: definePreference({
     values: THEME_MODE_VALUES,
-    defaultValue: "light",
+    defaultValue: "system",
     persistence: "client-cookie",
     attribute: "data-theme-mode",
   }),
 
   theme_preset: definePreference({
     values: THEME_PRESET_VALUES,
-    defaultValue: "default",
+    defaultValue: "tangerine",
     persistence: "client-cookie",
     attribute: "data-theme-preset",
   }),
@@ -90,7 +90,7 @@ export const PREFERENCE_REGISTRY = {
 
   sidebar_variant: defineSSRPreference({
     values: SIDEBAR_VARIANT_VALUES,
-    defaultValue: "sidebar",
+    defaultValue: "floating",
     persistence: "client-cookie",
     attribute: "data-sidebar-variant",
   }),

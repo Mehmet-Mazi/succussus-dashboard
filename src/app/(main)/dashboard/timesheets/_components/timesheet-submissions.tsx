@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { ChevronDown, ChevronLeft, ChevronRight, Download, ListFilter, Upload } from "lucide-react";
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,25 +18,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { timesheetStages, timesheetSubmissions, type TimesheetStage } from "./data";
+import { type TimesheetSubmission, type Timesheetstatus, timesheetStatus } from "./data";
 
-export function TimesheetSubmissions() {
+export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubmission[] }) {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedStages, setSelectedStages] = React.useState<TimesheetStage[]>([...timesheetStages]);
+  const [selectedStatus, setSelectedStatus] = React.useState<Timesheetstatus[]>([...timesheetStatus]);
   const [pageSize, setPageSize] = React.useState(10);
   const [pageIndex, setPageIndex] = React.useState(0);
 
   const filteredSubmissions = React.useMemo(() => {
     const normalizedQuery = searchQuery.toLowerCase();
 
-    return timesheetSubmissions.filter((submission) => {
+    return timesheets.filter((submission) => {
+      console.log(typeof submission.created_at);
       const matchesSearch = Object.values(submission).some((value) =>
         String(value).toLowerCase().includes(normalizedQuery),
       );
 
-      return matchesSearch && selectedStages.includes(submission.stage);
+      return matchesSearch && selectedStatus.includes(submission.status);
     });
-  }, [searchQuery, selectedStages]);
+  }, [timesheets, searchQuery, selectedStatus]);
+  console.log(filteredSubmissions, timesheets);
 
   const pageCount = Math.max(1, Math.ceil(filteredSubmissions.length / pageSize));
   const currentPageIndex = Math.min(pageIndex, pageCount - 1);
@@ -83,17 +86,17 @@ export function TimesheetSubmissions() {
       event.target.value = "";
     }
   }
-  function toggleStage(stage: TimesheetStage) {
-    setSelectedStages((currentStages) =>
-      currentStages.includes(stage)
-        ? currentStages.filter((currentStage) => currentStage !== stage)
-        : [...currentStages, stage],
+  function togglestatus(status: Timesheetstatus) {
+    setSelectedStatus((currentStatus) =>
+      currentStatus.includes(status)
+        ? currentStatus.filter((currentstatus) => currentstatus !== status)
+        : [...currentStatus, status],
     );
     setPageIndex(0);
   }
 
-  function toggleAllStages() {
-    setSelectedStages((currentStages) => (currentStages.length === timesheetStages.length ? [] : [...timesheetStages]));
+  function toggleAllstatuss() {
+    setSelectedStatus((currentstatus) => (currentstatus.length === timesheetStatus.length ? [] : [...timesheetStatus]));
     setPageIndex(0);
   }
 
@@ -115,12 +118,7 @@ export function TimesheetSubmissions() {
 
           <CardAction>
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <Button
-                type="button"
-                size="sm"
-                disabled={isUploading}
-                onClick={() => fileInputRef.current?.click()}
-              >
+              <Button type="button" size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
                 <Upload data-icon="inline-start" />
                 {isUploading ? "Uploading..." : "Upload"}
               </Button>
@@ -152,7 +150,7 @@ export function TimesheetSubmissions() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <ListFilter data-icon="inline-start" />
-                    Stage
+                    status
                     <ChevronDown data-icon="inline-end" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -160,25 +158,25 @@ export function TimesheetSubmissions() {
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuGroup>
                     <DropdownMenuCheckboxItem
-                      checked={selectedStages.length === timesheetStages.length}
-                      onCheckedChange={toggleAllStages}
+                      checked={selectedStatus.length === timesheetStatus.length}
+                      onCheckedChange={toggleAllstatuss}
                       onSelect={(event) => event.preventDefault()}
                     >
-                      All stages
+                      All statuss
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuGroup>
 
                   <DropdownMenuSeparator />
 
                   <DropdownMenuGroup>
-                    {timesheetStages.map((stage) => (
+                    {timesheetStatus.map((status) => (
                       <DropdownMenuCheckboxItem
-                        key={stage}
-                        checked={selectedStages.includes(stage)}
-                        onCheckedChange={() => toggleStage(stage)}
+                        key={status}
+                        checked={selectedStatus.includes(status)}
+                        onCheckedChange={() => togglestatus(status)}
                         onSelect={(event) => event.preventDefault()}
                       >
-                        {stage}
+                        {status}
                       </DropdownMenuCheckboxItem>
                     ))}
                   </DropdownMenuGroup>
@@ -206,15 +204,15 @@ export function TimesheetSubmissions() {
               {visibleSubmissions.length > 0 ? (
                 visibleSubmissions.map((submission) => (
                   <TableRow key={submission.id}>
-                    <TableCell className="text-center font-medium">{submission.id}</TableCell>
-                    <TableCell className="text-center">{submission.targetWeek}</TableCell>
-                    <TableCell className="text-center">{submission.uploaderName}</TableCell>
-                    <TableCell className="text-center">{submission.submittedDate}</TableCell>
-                    <TableCell className="text-center tabular-nums">{submission.totalDrivers}</TableCell>
+                    <TableCell className="text-center font-medium">{submission.id.slice(0, 8)}</TableCell>
+                    <TableCell className="text-center">{submission.target_week}</TableCell>
+                    <TableCell className="text-center">{submission.uploaded_by}</TableCell>
+                    <TableCell className="text-center">{submission.created_at}</TableCell>
+                    <TableCell className="text-center tabular-nums">{submission.total_drivers_processed}</TableCell>
                     <TableCell className="text-center tabular-nums">
-                      {submission.totalStops.toLocaleString()}
+                      {submission.total_stops_processed.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">{submission.earnings}</TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">{submission.total_payment}</TableCell>
                   </TableRow>
                 ))
               ) : (
