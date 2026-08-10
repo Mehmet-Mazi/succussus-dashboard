@@ -6,6 +6,7 @@ export interface TimesheetSubmission {
   id: string;
   target_date: string;
   uploaded_by: string;
+  uploader_name: string;
   created_at: string;
   total_drivers_processed: number;
   total_stops_processed: number;

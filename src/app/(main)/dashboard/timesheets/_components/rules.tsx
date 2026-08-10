@@ -135,212 +135,241 @@ function getChangedFields(
 function getPostcodeRates(): PostcodeRate[] {
   return [
     {
-      id:"1",
-      date:"24/12/2026",
+      id: "1",
+      date: "24/12/2026",
       postcode: "ME",
       rate: 20
     },
     {
-      id:"2",
-      date:"24/12/2026",
+      id: "2",
+      date: "24/12/2026",
       postcode: "MEs",
       rate: 20
     },
     {
-      id:"3",
-      date:"24/12/2026",
+      id: "3",
+      date: "24/12/2026",
       postcode: "MEx",
       rate: 20
     },
     {
-      id:"4",
-      date:"24/12/2026",
+      id: "4",
+      date: "24/12/2026",
       postcode: "MEb",
       rate: 20
     },
   ]
 }
 
-export default function Rules(){
+export default function Rules() {
+  const [open, setOpen] = useState(false)
   const [showChanges, setShowChanges] = useState(false)
   const [originalItems, setOriginalItems] = useState<EditableType>({
-    postcodeRates:getPostcodeRates(), 
-    fuelPerStop: 0.4, 
-    incentivePerStop: 0.2, 
+    postcodeRates: getPostcodeRates(),
+    fuelPerStop: 0.4,
+    incentivePerStop: 0.2,
     vanDeduction: 0.4
   })
 
   const [visibleItems, setVisibleItems] = useState<EditableType>({
-    postcodeRates:getPostcodeRates(), 
-    fuelPerStop: 0.4, 
-    incentivePerStop: 0.2, 
+    postcodeRates: getPostcodeRates(),
+    fuelPerStop: 0.4,
+    incentivePerStop: 0.2,
     vanDeduction: 0.4
   })
 
   const [changes, setChangedItems] = useState<ChangedFields>({})
 
-  
-  const updateItems = (values:Partial<EditableType>) => {
-    setVisibleItems((prev)=>{
-     return {...prev,...values} 
+
+  const updateItems = (values: Partial<EditableType>) => {
+    setVisibleItems((prev) => {
+      return { ...prev, ...values }
     })
   }
-  
+
   const verifyChanges = () => {
     const result = getChangedFields(originalItems, visibleItems)
-    if (Object.keys(result).length > 0){
+    if (Object.keys(result).length > 0) {
       setShowChanges(true)
-      console.log(result)
       setChangedItems(result)
     } else {
+      cancelHandler()
 
     }
- }
-  
+  }
+
+  const submitChanges = () => {
+    const result = getChangedFields(originalItems, visibleItems)
+    if (Object.keys(result).length > 0) {
+      // UPDATE OGIRINAL ITEM
+      cancelHandler()
+    }
+  }
+
+  const cancelHandler = () => {
+    setOpen(false)
+    setShowChanges(false)
+    setChangedItems({})
+    setVisibleItems(originalItems)
+  }
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={(open) => {
+      if (open === false) {
+        cancelHandler()
+      }
+      setOpen(open)
+    }}>
       <DialogTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           Rules
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-      {showChanges
-      ? 
-      <>
-        <DialogHeader>
-          <DialogTitle>Confirm Changes</DialogTitle>
-          <DialogDescription>Carefully verify the changes and submit when certain</DialogDescription>
-        </DialogHeader>
-        {changes.fuelPerStop && (
-      <p>
-        Fuel per stop:{" "}
-        {changes.fuelPerStop.before} → {changes.fuelPerStop.after}
-      </p>
-    )}
+        {showChanges
+          ?
+          <>
+            <DialogHeader>
+              <DialogTitle>Confirm Changes</DialogTitle>
+              <DialogDescription>Carefully verify the changes and submit when certain</DialogDescription>
+            </DialogHeader>
+            {changes.fuelPerStop && (
+              <p>
+                Fuel per stop:{" "}
+                {changes.fuelPerStop.before} → {changes.fuelPerStop.after}
+              </p>
+            )}
 
-    {changes.incentivePerStop && (
-      <p>
-        Incentive per stop:{" "}
-        {changes.incentivePerStop.before} → {changes.incentivePerStop.after}
-      </p>
-    )}
+            {changes.incentivePerStop && (
+              <p>
+                Incentive per stop:{" "}
+                {changes.incentivePerStop.before} → {changes.incentivePerStop.after}
+              </p>
+            )}
 
-    {changes.vanDeduction && (
-      <p>
-        Van deduction:{" "}
-        {changes.vanDeduction.before} → {changes.vanDeduction.after}
-      </p>
-    )}
+            {changes.vanDeduction && (
+              <p>
+                Van deduction:{" "}
+                {changes.vanDeduction.before} → {changes.vanDeduction.after}
+              </p>
+            )}
 
-    {changes.postcodeRates && (
-      <div>
-        <h3 className="font-extrabold">Postcode rates</h3>
+            {changes.postcodeRates && (
+              <div>
+                <h3 className="font-extrabold">Postcode rates</h3>
+                <div className="flex flex-wrap gap-5">
+                  {changes.postcodeRates.updated.length > 0 && (
+                    <div className="border w-fit p-3 rounded-md mt-3">
+                      <h4 className="font-bold">Updated</h4>
 
-        {changes.postcodeRates.updated.length > 0 && (
-          <div className="border w-fit p-3 rounded-md mt-3">
-            <h4 className="font-bold">Updated</h4>
+                      {changes.postcodeRates.updated.map((change) => (
+                        <div key={change.id} className="mt-3">
+                          <p className="flex place-items-center gap-3">
+                            Postcode: <span className="text-red-500">{change.before.postcode}</span> → <span className="text-green-500">{change.after.postcode}</span>
+                          </p>
 
-            {changes.postcodeRates.updated.map((change) => (
-              <div key={change.id} className="mt-3">
-                <p>
-                  {change.before.postcode} → {change.after.postcode}
-                </p>
+                          <p className="flex place-items-center gap-3">
+                            Rate: <span className="text-red-500">{change.before.rate}</span> → <span className="text-green-500">{change.after.rate}</span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                <p>
-                  Rate: {change.before.rate} → {change.after.rate}
-                </p>
+                  {changes.postcodeRates.added.length > 0 && (
+                    <div className="border w-fit p-3 rounded-md mt-3">
+                      <h4>Added</h4>
+
+                      {changes.postcodeRates.added.map((rate) => (
+                        <div key={rate.id}>
+                          <p className="text-green-500">
+                            {rate.postcode} — {rate.rate}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {changes.postcodeRates.deleted.length > 0 && (
+                    <div className="border w-fit p-3 rounded-md mt-3">
+                      <h4>Removed</h4>
+
+                      {changes.postcodeRates.deleted.map((rate) => (
+                        <div key={rate.id}>
+                          <p className="text-red-500">
+                            {rate.postcode} — {rate.rate}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
-        )}
+            )}
+            <DialogFooter>
+              <Button variant={"outline"} onClick={() => setShowChanges(false)} >
+                &larr; back
+              </Button>
+              <Button type="submit" variant={"default"} onClick={submitChanges}>
+                Submit
+              </Button>
+            </DialogFooter>
+          </>
+          :
+          <>
+            <DialogHeader>
+              <DialogTitle>Predifined Rules</DialogTitle>
+              <DialogDescription>Pre-define the rules for the timesheet</DialogDescription>
+            </DialogHeader>
 
-        {changes.postcodeRates.added.length > 0 && (
-          <div>
-            <h4>Added</h4>
-
-            {changes.postcodeRates.added.map((rate) => (
-              <div key={rate.id}>
-                <p>
-                  {rate.postcode} — {rate.rate}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {changes.postcodeRates.deleted.length > 0 && (
-          <div>
-            <h4>Removed</h4>
-
-            {changes.postcodeRates.deleted.map((rate) => (
-              <div key={rate.id}>
-                <p>
-                  {rate.postcode} — {rate.rate}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
-      </>
-      :
-      <>
-        <DialogHeader>
-          <DialogTitle>Predifined Rules</DialogTitle>
-          <DialogDescription>Pre-define the rules for the timesheet</DialogDescription>
-        </DialogHeader>
-        
-        <form className="flex flex-col gap-5" onSubmit={(event) => event.preventDefault()}>
-          <FieldGroup>
-            <Field>
-              <PostcodeTable postcodeRates={visibleItems.postcodeRates} onChange={(value:PostcodeRate[])=>updateItems({postcodeRates: value})}/>
-            </Field>
-            <div className="grid gap-4 sm:grid-cols-3 mt-5">
-              <Field>
-                <FieldLabel htmlFor="fuel-field">Fuel Allowance (p/s)</FieldLabel>
-                <Input
-                 id="fuel-field"
-                 placeholder="0.40"
-                 type="number"
-                 onChange={(e)=>updateItems({fuelPerStop:Number(e.currentTarget.value)})}
-                  />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="incentive-field">Incentive (p/s)</FieldLabel>
-                <Input
-                 id="incentive-field"
-                 placeholder="0.20"
-                 type="number"
-                 onChange={(e)=>updateItems({incentivePerStop:Number(e.currentTarget.value)})}
-                  />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="van-deduc-field">Van Deductions</FieldLabel>
-                <Input
-                 id="van-deduc-field"
-                 placeholder="0.40"
-                 type="number"
-                 onChange={(e)=>updateItems({vanDeduction:Number(e.currentTarget.value)})}
-                  />
-              </Field>
+            <div className="flex flex-col gap-5" onSubmit={(event) => event.preventDefault()}>
+              <FieldGroup>
+                <Field>
+                  <PostcodeTable postcodeRates={visibleItems.postcodeRates} onChange={(value: PostcodeRate[]) => updateItems({ postcodeRates: value })} />
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-3 mt-5">
+                  <Field>
+                    <FieldLabel htmlFor="fuel-field">Fuel Allowance (p/s)</FieldLabel>
+                    <Input
+                      id="fuel-field"
+                      placeholder="0.40"
+                      type="number"
+                      onChange={(e) => updateItems({ fuelPerStop: Number(e.currentTarget.value) })}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="incentive-field">Incentive (p/s)</FieldLabel>
+                    <Input
+                      id="incentive-field"
+                      placeholder="0.20"
+                      type="number"
+                      onChange={(e) => updateItems({ incentivePerStop: Number(e.currentTarget.value) })}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="van-deduc-field">Van Deductions</FieldLabel>
+                    <Input
+                      id="van-deduc-field"
+                      placeholder="0.40"
+                      type="number"
+                      onChange={(e) => updateItems({ vanDeduction: Number(e.currentTarget.value) })}
+                    />
+                  </Field>
+                </div>
+              </FieldGroup>
             </div>
-          </FieldGroup>
-          <DialogFooter>
-          <DialogClose asChild>
-
-            <Button variant={"outline"} >
-              Cancel
-            </Button>
-          </DialogClose>
-            <Button type="submit" variant={"default"} onClick={()=>verifyChanges()}>
-              Submit
-            </Button>
-          </DialogFooter>
-        </form>
-        </>
-      }
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant={"outline"} onClick={cancelHandler} >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" variant={"default"} onClick={verifyChanges}>
+                Submit
+              </Button>
+            </DialogFooter>
+          </>
+        }
       </DialogContent>
     </Dialog>
   )

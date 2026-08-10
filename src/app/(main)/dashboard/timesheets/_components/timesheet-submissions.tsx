@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { ChevronDown, ChevronLeft, ChevronRight, Download, ListFilter, Upload } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ListFilter, MapPin, Pencil, Upload, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { type TimesheetSubmission, type Timesheetstatus, timesheetStatus } from "./data";
 import Rules from "./rules";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubmission[] }) {
+export function TimesheetSubmissions({ timesheets, individualTimesheets }: { timesheets: TimesheetSubmission[]; individualTimesheets: TimesheetSubmission[] }) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedStatus, setSelectedStatus] = React.useState<Timesheetstatus[]>([...timesheetStatus]);
   const [pageSize, setPageSize] = React.useState(10);
@@ -31,7 +32,6 @@ export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubm
     const normalizedQuery = searchQuery.toLowerCase();
 
     return timesheets.filter((submission) => {
-      console.log(typeof submission.created_at);
       const matchesSearch = Object.values(submission).some((value) =>
         String(value).toLowerCase().includes(normalizedQuery),
       );
@@ -118,7 +118,7 @@ export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubm
 
           <CardAction>
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <Rules/>
+              <Rules />
               <Button type="button" size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
                 <Upload data-icon="inline-start" />
                 {isUploading ? "Uploading..." : "Upload"}
@@ -187,44 +187,103 @@ export function TimesheetSubmissions({ timesheets }: { timesheets: TimesheetSubm
           </CardAction>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4 px-0">
-          <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4 **:data-[slot='table-cell']:py-4">
-            <TableHeader className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground">
-              <TableRow>
-                <TableHead className="text-center">ID</TableHead>
-                <TableHead className="text-center">Target Week</TableHead>
-                <TableHead className="text-center">Uploader Name</TableHead>
-                <TableHead className="text-center">Submitted Date</TableHead>
-                <TableHead className="text-center">Total Drivers</TableHead>
-                <TableHead className="text-center">Total Stops</TableHead>
-                <TableHead className="text-center">Earnings</TableHead>
-              </TableRow>
-            </TableHeader>
+        <CardContent className="flex flex-col gap-4 px-0 w-full">
+          <div className="w-full p-4">
+            <div className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground">
+              <div className="grid grid-cols-[repeat(7,1fr)_auto] h-11 font-medium text-foreground p-4">
+                <div className="text-center">ID</div>
+                <div className="text-center">Target Week</div>
+                <div className="text-center">Uploader Name</div>
+                <div className="text-center">Submitted Date</div>
+                <div className="text-center">Total Drivers</div>
+                <div className="text-center">Total Stops</div>
+                <div className="text-center">Total Payout</div>
+                <div className="w-5"></div>
+              </div>
+            </div>
 
-            <TableBody>
+            <div className="flex flex-col gap-3 mt-2">
               {visibleSubmissions.length > 0 ? (
-                visibleSubmissions.map((submission) => (
-                  <TableRow key={submission.id}>
-                    <TableCell className="text-center font-medium">{submission.id.slice(0, 8)}</TableCell>
-                    <TableCell className="text-center">{submission.target_week}</TableCell>
-                    <TableCell className="text-center">{submission.uploaded_by}</TableCell>
-                    <TableCell className="text-center">{submission.created_at}</TableCell>
-                    <TableCell className="text-center tabular-nums">{submission.total_drivers_processed}</TableCell>
-                    <TableCell className="text-center tabular-nums">
-                      {submission.total_stops_processed.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">{submission.total_payment}</TableCell>
-                  </TableRow>
-                ))
+                <Accordion
+                  className="AccordionRoot grid gap-4"
+                  type="single"
+                  collapsible
+                >
+                  {visibleSubmissions.map((submission) => (
+                    <AccordionItem key={submission.id} className="relative overflow-hidden border-none" value={`item-${submission.id}`}>
+                      <div className="border border-foreground/20  hover:bg-purple-600/5 rounded-lg">
+                        <div className="absolute inset-0 border-s-4 rounded-l-lg border-purple-600 z-0" />
+                        <AccordionTrigger className="no-underline! shadow-2xl cursor-pointer grid grid-cols-[repeat(7,1fr)_auto] p-4 place-content-center items-center z-0">
+                          <div className="text-center font-medium">{submission.id.slice(0, 8)}</div>
+                          <div className="text-center">{submission.target_week}</div>
+                          <div className="text-center">{submission.uploader_name}</div>
+                          <div className="text-center">{new Date(submission.created_at).toLocaleDateString("en-UK")}</div>
+                          <div className="text-center tabular-nums flex justify-center items-center gap-2">
+                            <div className="bg-purple-600/30 p-2 rounded-full">
+                              <Users size={18} className="text-purple-400" />
+                            </div>
+                            {submission.total_drivers_processed}
+                          </div>
+                          <div className="text-center tabular-nums flex justify-center items-center gap-2">
+                            <div className="bg-blue-600/30 p-2 rounded-full">
+                              <MapPin size={18} className="text-blue-400" />
+                            </div>
+                            {submission.total_stops_processed.toLocaleString()}
+                          </div>
+                          <div className="text-center font-medium tabular-nums w-full ">
+                            <Badge
+                              variant="outline"
+                              className={
+                                Number(submission.total_payment) > 50
+                                  ? "border-green-200 bg-green-500/10 text-green-700 dark:border-green-900/40 dark:bg-green-500/15 dark:text-green-300 p-4"
+                                  : "p-4"
+                              }
+                            >
+                              £ {submission.total_payment}
+                            </Badge>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="z-20">
+                          <div className="grid grid-cols-[repeat(7,1fr)_auto] justify-center items-center *:text-center p-4 z-10">
+                            <div className="text-center col-start-1">
+                              <CardTitle >Driver Timesheets</CardTitle>
+                              <CardDescription>Inspect individual timesheets </CardDescription>
+                            </div>
+                            <Input
+                              className="h-8 w-48 md:w-56 col-start-7"
+                              placeholder="Search timesheets..."
+                              value={searchQuery}
+                              onChange={(event) => {
+                                setSearchQuery(event.target.value);
+                                setPageIndex(0);
+                              }}
+                            />
+                          </div>
+                          <div className="p-4 grid grid-cols-[repeat(7,1fr)_auto] justify-center items-center *:text-center">
+                            <div className="absolute"></div>
+                            <div className="text-center">Driver</div>
+                            <div className="text-center">Date</div>
+                            <div className="text-center">Fuel Allowance</div>
+                            <div className="text-center">Incentive</div>
+                            <div className="text-center">Route Number</div>
+                            <div className="text-center">Total Stops</div>
+                            <div className="text-center">Total Payment</div>
+                            <div className="w-5"><Pencil className="cursor-pointer" size="18" color="red" /></div>
+                          </div>
+                        </AccordionContent>
+                      </div>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <div>
+                  <div className="h-24 text-center text-muted-foreground">
                     No timesheets found.
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               )}
-            </TableBody>
-          </Table>
+            </div>
+          </div>
 
           <div className="flex flex-col gap-3 px-4 pb-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-muted-foreground text-sm">
