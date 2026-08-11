@@ -3,11 +3,11 @@ import { cookies } from "next/headers";
 import type { TimesheetSubmission } from "./_components/data";
 import { TimesheetKpiCards } from "./_components/timesheet-kpi-cards";
 import { TimesheetSubmissions } from "./_components/timesheet-submissions";
+import { IndividualTimesheets } from "./_components/table";
 
 async function getTimesheets(): Promise<TimesheetSubmission[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token")?.value;
-  console.log("cookieStore:", accessToken);
   const response = await fetch(process.env.API_URL + "/timesheets/", {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
@@ -20,10 +20,9 @@ async function getTimesheets(): Promise<TimesheetSubmission[]> {
   return res;
 }
 
-async function getIndividualTimesheets(): Promise<TimesheetSubmission[]> {
+async function getIndividualTimesheets(): Promise<IndividualTimesheets> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token")?.value;
-  console.log("cookieStore:", accessToken);
   const response = await fetch(process.env.API_URL + "/timesheets/09-08-2026", {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
@@ -33,7 +32,7 @@ async function getIndividualTimesheets(): Promise<TimesheetSubmission[]> {
     throw new Error("Failed to fetch timesheets");
   }
   const res = await response.json();
-  return res;
+  return res.data;
 }
 
 export default async function TimesheetsPage() {

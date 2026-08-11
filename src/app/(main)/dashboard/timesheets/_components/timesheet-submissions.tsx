@@ -21,8 +21,9 @@ import { type TimesheetSubmission, type Timesheetstatus, timesheetStatus } from 
 import Rules from "./rules";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import TimesheetLayerOne, { IndividualTimesheets } from "./table";
 
-export function TimesheetSubmissions({ timesheets, individualTimesheets }: { timesheets: TimesheetSubmission[]; individualTimesheets: TimesheetSubmission[] }) {
+export function TimesheetSubmissions({ timesheets, individualTimesheets }: { timesheets: TimesheetSubmission[]; individualTimesheets: IndividualTimesheets }) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedStatus, setSelectedStatus] = React.useState<Timesheetstatus[]>([...timesheetStatus]);
   const [pageSize, setPageSize] = React.useState(10);
@@ -190,19 +191,19 @@ export function TimesheetSubmissions({ timesheets, individualTimesheets }: { tim
         <CardContent className="flex flex-col gap-4 px-0 w-full">
           <div className="w-full p-4">
             <div className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground">
-              <div className="grid grid-cols-[repeat(7,1fr)_auto] h-11 font-medium text-foreground p-4">
-                <div className="text-center">ID</div>
-                <div className="text-center">Target Week</div>
-                <div className="text-center">Uploader Name</div>
-                <div className="text-center">Submitted Date</div>
-                <div className="text-center">Total Drivers</div>
-                <div className="text-center">Total Stops</div>
-                <div className="text-center">Total Payout</div>
+              <div className="grid grid-cols-[repeat(7,1fr)_auto] h-14 font-medium text-foreground px-4 items-center">
+                <div className="">ID</div>
+                <div className="">Target Week</div>
+                <div className="">Uploader Name</div>
+                <div className="">Submitted Date</div>
+                <div className="">Total Drivers</div>
+                <div className="">Total Stops</div>
+                <div className="">Total Payout</div>
                 <div className="w-5"></div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 mt-2">
+            <div className="flex flex-col gap-3">
               {visibleSubmissions.length > 0 ? (
                 <Accordion
                   className="AccordionRoot grid gap-4"
@@ -211,26 +212,25 @@ export function TimesheetSubmissions({ timesheets, individualTimesheets }: { tim
                 >
                   {visibleSubmissions.map((submission) => (
                     <AccordionItem key={submission.id} className="relative overflow-hidden border-none" value={`item-${submission.id}`}>
-                      <div className="border border-foreground/20  hover:bg-purple-600/5 rounded-lg">
-                        <div className="absolute inset-0 border-s-4 rounded-l-lg border-purple-600 z-0" />
-                        <AccordionTrigger className="no-underline! shadow-2xl cursor-pointer grid grid-cols-[repeat(7,1fr)_auto] p-4 place-content-center items-center z-0">
-                          <div className="text-center font-medium">{submission.id.slice(0, 8)}</div>
-                          <div className="text-center">{submission.target_week}</div>
-                          <div className="text-center">{submission.uploader_name}</div>
-                          <div className="text-center">{new Date(submission.created_at).toLocaleDateString("en-UK")}</div>
-                          <div className="text-center tabular-nums flex justify-center items-center gap-2">
+                      <div className="border border-foreground/20  hover:bg-purple-600/5 rounded-lg before:absolute before:left-0 before:w-10 before:top-0 before:bottom-0 before:border-s-0 before:rounded-l-lg before:border-purple-600">
+                        <AccordionTrigger className="no-underline! shadow-2xl cursor-pointer grid grid-cols-[repeat(7,1fr)_auto] px-4 place-content-center items-center z-0">
+                          <div className=" font-medium">{submission.id.slice(0, 8)}</div>
+                          <div className="">{submission.target_week}</div>
+                          <div className="">{submission.uploader_name}</div>
+                          <div className="">{new Date(submission.created_at).toLocaleDateString("en-UK")}</div>
+                          <div className=" tabular-nums flex items-center gap-2">
                             <div className="bg-purple-600/30 p-2 rounded-full">
                               <Users size={18} className="text-purple-400" />
                             </div>
                             {submission.total_drivers_processed}
                           </div>
-                          <div className="text-center tabular-nums flex justify-center items-center gap-2">
+                          <div className=" tabular-nums flex items-center gap-2">
                             <div className="bg-blue-600/30 p-2 rounded-full">
                               <MapPin size={18} className="text-blue-400" />
                             </div>
                             {submission.total_stops_processed.toLocaleString()}
                           </div>
-                          <div className="text-center font-medium tabular-nums w-full ">
+                          <div className=" font-medium tabular-nums w-full ">
                             <Badge
                               variant="outline"
                               className={
@@ -244,32 +244,7 @@ export function TimesheetSubmissions({ timesheets, individualTimesheets }: { tim
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="z-20">
-                          <div className="grid grid-cols-[repeat(7,1fr)_auto] justify-center items-center *:text-center p-4 z-10">
-                            <div className="text-center col-start-1">
-                              <CardTitle >Driver Timesheets</CardTitle>
-                              <CardDescription>Inspect individual timesheets </CardDescription>
-                            </div>
-                            <Input
-                              className="h-8 w-48 md:w-56 col-start-7"
-                              placeholder="Search timesheets..."
-                              value={searchQuery}
-                              onChange={(event) => {
-                                setSearchQuery(event.target.value);
-                                setPageIndex(0);
-                              }}
-                            />
-                          </div>
-                          <div className="p-4 grid grid-cols-[repeat(7,1fr)_auto] justify-center items-center *:text-center">
-                            <div className="absolute"></div>
-                            <div className="text-center">Driver</div>
-                            <div className="text-center">Date</div>
-                            <div className="text-center">Fuel Allowance</div>
-                            <div className="text-center">Incentive</div>
-                            <div className="text-center">Route Number</div>
-                            <div className="text-center">Total Stops</div>
-                            <div className="text-center">Total Payment</div>
-                            <div className="w-5"><Pencil className="cursor-pointer" size="18" color="red" /></div>
-                          </div>
+                          <TimesheetLayerOne individualTimesheets={individualTimesheets} />
                         </AccordionContent>
                       </div>
                     </AccordionItem>
@@ -277,7 +252,7 @@ export function TimesheetSubmissions({ timesheets, individualTimesheets }: { tim
                 </Accordion>
               ) : (
                 <div>
-                  <div className="h-24 text-center text-muted-foreground">
+                  <div className="h-24  text-muted-foreground">
                     No timesheets found.
                   </div>
                 </div>
@@ -297,7 +272,7 @@ export function TimesheetSubmissions({ timesheets, individualTimesheets }: { tim
 
               <Input
                 id="timesheets-page-size"
-                className="h-8 w-16 text-center"
+                className="h-8 w-16 "
                 type="number"
                 min="1"
                 max="100"
