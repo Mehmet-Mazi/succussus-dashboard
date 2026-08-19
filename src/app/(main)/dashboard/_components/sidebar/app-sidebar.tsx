@@ -40,11 +40,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   readonly role: AppRole;
   readonly user: NavUserData;
 }
-export function AppSidebar({
-  role,
-  user,
-  ...props
-}: AppSidebarProps) {
+export function AppSidebar({ role, user, ...props }: AppSidebarProps) {
   const { sidebarVariant, sidebarCollapsible, isSynced } = usePreferencesStore(
     useShallow((s) => ({
       sidebarVariant: s.values.sidebar_variant,
@@ -67,7 +63,9 @@ export function AppSidebar({
               {/* <Link prefetch={false} href="/dashboard/default"> */}
               <Link prefetch={false} href={homeUrl}>
                 <Command />
-                <span className="font-semibold text-base">{roleLabels[role]}</span>
+                <span className="font-semibold text-base">
+                  {roleLabels[role]}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -77,7 +75,6 @@ export function AppSidebar({
         <NavMain items={permittedSidebarItems} />
       </SidebarContent>
       <SidebarFooter>
-        <SupportCard />
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
