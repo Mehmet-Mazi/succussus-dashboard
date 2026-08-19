@@ -37,7 +37,6 @@ export default async function TimesheetSubmissionPage({
   const { slug } = await params;
   const timesheets = await getIndividualTimesheets(slug);
   const adjustments = await getAdjustments(slug);
-  console.log("timesheet:", timesheets.timesheets);
   return (
     <div>
       <div className="flex justify-between">

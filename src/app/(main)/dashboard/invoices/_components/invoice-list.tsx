@@ -68,7 +68,7 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
 const successStatusClasses =
   "border-emerald-200 bg-emerald-50 text-emerald-700 " +
   "dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300";
-const statusBadgeClasses: Record<InvoiceStatus, string> = {
+const statusBadgeClasses = {
   FINALISED: successStatusClasses,
   invoice_sent: successStatusClasses,
   unfulfilled:
@@ -86,7 +86,7 @@ type DateSortDirection = "asc" | "desc";
 
 type Mode = "all" | "range" | "week";
 
-function formatStatus(status: InvoiceStatus) {
+function formatStatus(status) {
   return status
     .split("_")
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
@@ -263,13 +263,10 @@ export function InvoiceList({ invoiceData }: { invoiceData: InvoiceRecord[] }) {
       return;
     }
 
-    console.log(selectedInvoiceIds);
-
     toast.info(
       `Bulk download for ${selectedInvoiceIds.size} invoice(s) will be available soon.`,
     );
   }
-  console.log("date is", date);
   // const [selectedDates, setSelectedDates] = useState()
   return (
     <section>
