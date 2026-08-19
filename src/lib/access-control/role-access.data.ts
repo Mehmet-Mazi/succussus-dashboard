@@ -1,4 +1,3 @@
-
 export const APP_ROLES = ["admin", "director", "manager", "guest"] as const;
 
 export type AppRole = (typeof APP_ROLES)[number];
@@ -13,19 +12,28 @@ export interface RoleAccess {
 
 const authenticationRoutes = ["/auth/v1/login", "/auth/v1/register"] as const;
 
-
 export const roleAccess: Record<AppRole, RoleAccess> = {
   admin: {
     allowedRoutes: "all",
   },
   director: {
-    allowedRoutes: "all",
+    // allowedRoutes: "all",
+    allowedRoutes: [
+      "/dashboard/finances",
+      "/dashboard/analytics",
+      "/dashboard/tasks",
+      "/dashboard/contracts",
+      "/dashboard/files-manager",
+      "/dashboard/timesheets",
+      "/dashboard/invoices",
+      //...authenticationRoutes,
+    ],
   },
   manager: {
     allowedRoutes: [
       "/dashboard/timesheets",
       "/dashboard/invoices",
-      ...authenticationRoutes,
+      //...authenticationRoutes,
     ],
   },
   guest: {

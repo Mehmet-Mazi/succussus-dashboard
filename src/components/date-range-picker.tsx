@@ -7,7 +7,11 @@ import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface DateRangePickerProps {
   value?: DateRange;
@@ -16,7 +20,9 @@ interface DateRangePickerProps {
 
 export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [internalDateRange, setInternalDateRange] = React.useState<DateRange | undefined>(() => {
+  const [internalDateRange, setInternalDateRange] = React.useState<
+    DateRange | undefined
+  >(() => {
     const to = new Date();
     const from = subDays(to, 29);
     return { from, to };
@@ -42,12 +48,13 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" id="date" className="font-normal">
+        <Button variant="destructive" id="date" className="font-normal">
           {dateRangeLabel}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto overflow-hidden p-0" align="end">
         <Calendar
+          ISOWeek
           mode="range"
           defaultMonth={dateRange?.from}
           selected={dateRange}

@@ -6,7 +6,7 @@ import {
   Fingerprint,
   FolderOpen,
   Forklift,
-  ChartGantt,//new icon
+  ChartGantt, //new icon
   Gauge,
   GraduationCap,
   Kanban,
@@ -73,13 +73,15 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/default",
         icon: LayoutDashboard,
       },
-      {// new sheet added to the sidebar
+      {
+        // new sheet added to the sidebar
         id: "timesheets",
         title: "Timesheets",
         url: "/dashboard/timesheets",
         icon: ChartGantt,
       },
-      {// new sheet added to the sidebar
+      {
+        // new sheet added to the sidebar
         id: "invoices",
         title: "Invoices",
         url: "/dashboard/invoices",
@@ -90,6 +92,7 @@ export const sidebarItems: NavGroup[] = [
         title: "Contracts",
         url: "/dashboard/contracts",
         icon: FileText,
+        badge: "soon",
       },
       {
         id: "dashboard",
@@ -114,6 +117,7 @@ export const sidebarItems: NavGroup[] = [
         title: "Analytics",
         url: "/dashboard/analytics",
         icon: Gauge,
+        badge: "soon",
       },
       {
         id: "productivity",
@@ -150,7 +154,7 @@ export const sidebarItems: NavGroup[] = [
         title: "File Manager",
         url: "/dashboard/file-manager",
         icon: FolderOpen,
-        badge: "new",
+        badge: "soon",
       },
     ],
   },
@@ -187,6 +191,7 @@ export const sidebarItems: NavGroup[] = [
         title: "Tasks",
         url: "/dashboard/tasks",
         icon: CheckSquare,
+        badge: "soon",
       },
       {
         id: "invoice",
@@ -211,10 +216,30 @@ export const sidebarItems: NavGroup[] = [
         title: "Authentication",
         icon: Fingerprint,
         subItems: [
-          { id: "auth-login-v1", title: "Login v1", url: "/auth/v1/login", newTab: true },
-          { id: "auth-login-v2", title: "Login v2", url: "/auth/v2/login", newTab: true },
-          { id: "auth-register-v1", title: "Register v1", url: "/auth/v1/register", newTab: true },
-          { id: "auth-register-v2", title: "Register v2", url: "/auth/v2/register", newTab: true },
+          {
+            id: "auth-login-v1",
+            title: "Login v1",
+            url: "/auth/v1/login",
+            newTab: true,
+          },
+          {
+            id: "auth-login-v2",
+            title: "Login v2",
+            url: "/auth/v2/login",
+            newTab: true,
+          },
+          {
+            id: "auth-register-v1",
+            title: "Register v1",
+            url: "/auth/v1/register",
+            newTab: true,
+          },
+          {
+            id: "auth-register-v2",
+            title: "Register v2",
+            url: "/auth/v2/register",
+            newTab: true,
+          },
         ],
       },
     ],
@@ -227,10 +252,22 @@ export const sidebarItems: NavGroup[] = [
         id: "legacy-dashboards",
         title: "Dashboards",
         subItems: [
-          { id: "legacy-default", title: "Default V1", url: "/dashboard/default-v1" },
+          {
+            id: "legacy-default",
+            title: "Default V1",
+            url: "/dashboard/default-v1",
+          },
           { id: "legacy-crm", title: "CRM V1", url: "/dashboard/crm-v1" },
-          { id: "legacy-finance", title: "Finance V1", url: "/dashboard/finance-v1" },
-          { id: "legacy-analytics", title: "Analytics V1", url: "/dashboard/analytics-v1" },
+          {
+            id: "legacy-finance",
+            title: "Finance V1",
+            url: "/dashboard/finance-v1",
+          },
+          {
+            id: "legacy-analytics",
+            title: "Analytics V1",
+            url: "/dashboard/analytics-v1",
+          },
         ],
       },
     ],

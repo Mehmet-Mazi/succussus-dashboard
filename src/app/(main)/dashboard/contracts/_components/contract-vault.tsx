@@ -11,6 +11,7 @@ import {
   Ellipsis,
   FileText,
   Search,
+  Trash,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,8 +25,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AddContractDialog } from "./add-contract-dialog";
@@ -103,7 +115,13 @@ function ContractRow({
   return (
     <TableRow className={nested ? "bg-muted/20" : undefined}>
       <TableCell>
-        <div className={nested ? "flex min-w-0 items-center gap-3 pl-8" : "flex min-w-0 items-center gap-3"}>
+        <div
+          className={
+            nested
+              ? "flex min-w-0 items-center gap-3 pl-8"
+              : "flex min-w-0 items-center gap-3"
+          }
+        >
           {nested ? (
             <CornerDownRight className="size-4 shrink-0 text-muted-foreground" />
           ) : (
@@ -131,10 +149,10 @@ function ContractRow({
         </div>
       </TableCell>
       {showClient && <TableCell>{client?.name}</TableCell>}
-      <TableCell>{contract.service}</TableCell>
       <TableCell className="text-muted-foreground">
         {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
       </TableCell>
+      <TableCell>{contract.service}</TableCell>
       <TableCell className="font-medium tabular-nums">
         £{contract.rate.toFixed(2)} {contract.rateUnit}
       </TableCell>
@@ -143,13 +161,13 @@ function ContractRow({
           {formatStatus(status)}
         </Badge>
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
               variant="ghost"
-              size="icon-sm"
+              size="lg"
               aria-label={`Actions for ${contract.name}`}
             >
               <Ellipsis />
@@ -164,6 +182,13 @@ function ContractRow({
               <Download />
               Download contract
             </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => onDownload(contract)}
+            >
+              <Trash />
+              Delete Contract
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -174,37 +199,58 @@ function ContractRow({
 export function ContractVault() {
   const [view, setView] = React.useState<ContractView>("client");
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [expandedClientIds, setExpandedClientIds] = React.useState<Set<string>>(() => new Set());
-  const [selectedContract, setSelectedContract] = React.useState<ContractRecord | null>(null);
+  const [expandedClientIds, setExpandedClientIds] = React.useState<Set<string>>(
+    () => new Set(),
+  );
+  const [selectedContract, setSelectedContract] =
+    React.useState<ContractRecord | null>(null);
   const [pageSize, setPageSize] = React.useState(10);
   const [pageIndex, setPageIndex] = React.useState(0);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const visibleContracts = contractTestData.filter((contract) => {
-    const client = contractClients.find((item) => item.id === contract.clientId);
+    const client = contractClients.find(
+      (item) => item.id === contract.clientId,
+    );
 
     return matchesContractSearch(contract, client, normalizedQuery);
   });
   const visibleClients = contractClients.filter((client) => {
-    const clientContracts = contractTestData.filter((contract) => contract.clientId === client.id);
+    const clientContracts = contractTestData.filter(
+      (contract) => contract.clientId === client.id,
+    );
     const clientMatches = client.name.toLowerCase().includes(normalizedQuery);
 
     return (
       clientMatches ||
-      clientContracts.some((contract) => matchesContractSearch(contract, client, normalizedQuery))
+      clientContracts.some((contract) =>
+        matchesContractSearch(contract, client, normalizedQuery),
+      )
     );
   });
-  const totalVisibleItems = view === "client" ? visibleClients.length : visibleContracts.length;
+  const totalVisibleItems =
+    view === "client" ? visibleClients.length : visibleContracts.length;
   const pageCount = Math.max(1, Math.ceil(totalVisibleItems / pageSize));
   const currentPageIndex = Math.min(pageIndex, pageCount - 1);
   const pageStart = currentPageIndex * pageSize;
-  const paginatedClients = visibleClients.slice(pageStart, pageStart + pageSize);
-  const paginatedContracts = visibleContracts.slice(pageStart, pageStart + pageSize);
-  const visibleItemCount = view === "client" ? paginatedClients.length : paginatedContracts.length;
+  const paginatedClients = visibleClients.slice(
+    pageStart,
+    pageStart + pageSize,
+  );
+  const paginatedContracts = visibleContracts.slice(
+    pageStart,
+    pageStart + pageSize,
+  );
+  const visibleItemCount =
+    view === "client" ? paginatedClients.length : paginatedContracts.length;
 
   const selectedContractClient =
-    contractClients.find((client) => client.id === selectedContract?.clientId) ?? null;
-  const selectedContractStatus = selectedContract ? getContractStatus(selectedContract) : null;
+    contractClients.find(
+      (client) => client.id === selectedContract?.clientId,
+    ) ?? null;
+  const selectedContractStatus = selectedContract
+    ? getContractStatus(selectedContract)
+    : null;
 
   function toggleClient(clientId: string) {
     setExpandedClientIds((currentIds) => {
@@ -221,13 +267,19 @@ export function ContractVault() {
   }
 
   function previewDownload(contract: ContractRecord) {
-    toast.info(`Download for ${contract.fileName} will be connected when the API is available.`);
+    toast.info(
+      `Download for ${contract.fileName} will be connected when the API is available.`,
+    );
   }
 
   function updatePageSize(value: string) {
     const nextPageSize = Number(value);
 
-    if (Number.isInteger(nextPageSize) && nextPageSize >= 1 && nextPageSize <= 100) {
+    if (
+      Number.isInteger(nextPageSize) &&
+      nextPageSize >= 1 &&
+      nextPageSize <= 100
+    ) {
       setPageSize(nextPageSize);
       setPageIndex(0);
     }
@@ -237,7 +289,9 @@ export function ContractVault() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl leading-none tracking-tight">Contract Vault</h1>
+          <h1 className="text-3xl leading-none tracking-tight">
+            Contract Vault
+          </h1>
           <p className="text-muted-foreground text-sm">
             Manage client contracts and the rates used to generate invoices.
           </p>
@@ -245,7 +299,10 @@ export function ContractVault() {
         <AddContractDialog />
       </div>
 
-      <section className="flex flex-col gap-3" aria-labelledby="contracts-heading">
+      <section
+        className="flex flex-col gap-3"
+        aria-labelledby="contracts-heading"
+      >
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <Tabs
             value={view}
@@ -269,8 +326,12 @@ export function ContractVault() {
           <InputGroup className="md:max-w-sm">
             <InputGroupInput
               value={searchQuery}
-              placeholder={view === "client" ? "Search clients..." : "Search contracts..."}
-              aria-label={view === "client" ? "Search clients" : "Search contracts"}
+              placeholder={
+                view === "client" ? "Search clients..." : "Search contracts..."
+              }
+              aria-label={
+                view === "client" ? "Search clients" : "Search contracts"
+              }
               onChange={(event) => {
                 setSearchQuery(event.target.value);
                 setPageIndex(0);
@@ -284,17 +345,21 @@ export function ContractVault() {
 
         <Card>
           <CardContent className="flex flex-col gap-4 px-0">
-            <Table>
+            <Table className="table-fixed">
               {view === "client" ? (
                 <>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Client / Contract</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Term</TableHead>
-                      <TableHead>Rate</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="w-[30ch]">
+                        Client / Contract
+                      </TableHead>
+                      <TableHead className="w-[20ch]">Term</TableHead>
+                      <TableHead className="w-[15ch]">Service</TableHead>
+                      <TableHead className="w-[15ch]">Rate</TableHead>
+                      <TableHead className="w-[15ch]">Status</TableHead>
+                      <TableHead className="w-[10ch] text-center">
+                        Actions
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -303,18 +368,26 @@ export function ContractVault() {
                         const allClientContracts = contractTestData.filter(
                           (contract) => contract.clientId === client.id,
                         );
-                        const clientNameMatches = client.name.toLowerCase().includes(normalizedQuery);
+                        const clientNameMatches = client.name
+                          .toLowerCase()
+                          .includes(normalizedQuery);
                         const clientContracts = clientNameMatches
                           ? allClientContracts
                           : allClientContracts.filter((contract) =>
-                              matchesContractSearch(contract, client, normalizedQuery),
+                              matchesContractSearch(
+                                contract,
+                                client,
+                                normalizedQuery,
+                              ),
                             );
                         const activeContracts = allClientContracts.filter(
-                          (contract) => getContractStatus(contract) === "active",
+                          (contract) =>
+                            getContractStatus(contract) === "active",
                         ).length;
                         const isExpanded =
                           expandedClientIds.has(client.id) ||
-                          (normalizedQuery.length > 0 && clientContracts.length > 0);
+                          (normalizedQuery.length > 0 &&
+                            clientContracts.length > 0);
 
                         return (
                           <React.Fragment key={client.id}>
@@ -327,18 +400,27 @@ export function ContractVault() {
                                   aria-expanded={isExpanded}
                                   onClick={() => toggleClient(client.id)}
                                 >
-                                  {isExpanded ? <ChevronDown /> : <ChevronRight />}
-                                  <span className="font-semibold">{client.name}</span>
+                                  {isExpanded ? (
+                                    <ChevronDown />
+                                  ) : (
+                                    <ChevronRight />
+                                  )}
+                                  <span className="font-semibold">
+                                    {client.name}
+                                  </span>
                                   <span className="text-muted-foreground text-xs">
                                     {allClientContracts.length} contracts
                                   </span>
                                 </Button>
                               </TableCell>
-                              <TableCell colSpan={3} className="text-muted-foreground">
-                                {allClientContracts.length} contracts on file
-                              </TableCell>
+                              <TableCell
+                                colSpan={3}
+                                className="text-muted-foreground"
+                              ></TableCell>
                               <TableCell>
-                                <Badge variant="secondary">{activeContracts} active</Badge>
+                                <Badge variant="secondary">
+                                  {activeContracts} active
+                                </Badge>
                               </TableCell>
                               <TableCell />
                             </TableRow>
@@ -360,7 +442,10 @@ export function ContractVault() {
                       })
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-28 text-center text-muted-foreground">
+                        <TableCell
+                          colSpan={6}
+                          className="h-28 text-center text-muted-foreground"
+                        >
                           No clients found.
                         </TableCell>
                       </TableRow>
@@ -386,7 +471,9 @@ export function ContractVault() {
                         <ContractRow
                           key={contract.id}
                           contract={contract}
-                          client={contractClients.find((client) => client.id === contract.clientId)}
+                          client={contractClients.find(
+                            (client) => client.id === contract.clientId,
+                          )}
                           showClient
                           onView={setSelectedContract}
                           onDownload={previewDownload}
@@ -394,7 +481,10 @@ export function ContractVault() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-28 text-center text-muted-foreground">
+                        <TableCell
+                          colSpan={7}
+                          className="h-28 text-center text-muted-foreground"
+                        >
                           No contracts found.
                         </TableCell>
                       </TableRow>
@@ -411,7 +501,10 @@ export function ContractVault() {
               </p>
 
               <div className="flex flex-wrap items-center gap-2">
-                <label className="text-muted-foreground text-sm" htmlFor="contracts-page-size">
+                <label
+                  className="text-muted-foreground text-sm"
+                  htmlFor="contracts-page-size"
+                >
                   Rows per page
                 </label>
 
@@ -430,7 +523,9 @@ export function ContractVault() {
                   variant="outline"
                   size="sm"
                   disabled={currentPageIndex === 0}
-                  onClick={() => setPageIndex((currentIndex) => currentIndex - 1)}
+                  onClick={() =>
+                    setPageIndex((currentIndex) => currentIndex - 1)
+                  }
                 >
                   <ChevronLeft />
                   Previous
@@ -445,7 +540,9 @@ export function ContractVault() {
                   variant="outline"
                   size="sm"
                   disabled={currentPageIndex >= pageCount - 1}
-                  onClick={() => setPageIndex((currentIndex) => currentIndex + 1)}
+                  onClick={() =>
+                    setPageIndex((currentIndex) => currentIndex + 1)
+                  }
                 >
                   Next
                   <ChevronRight />

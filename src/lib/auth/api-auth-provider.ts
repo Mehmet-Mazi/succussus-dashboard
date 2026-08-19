@@ -1,13 +1,9 @@
 import { z } from "zod";
 
-import type {
-  AuthCredentials,
-  AuthSession,
-} from "./auth.types";
+import type { AuthCredentials, AuthSession } from "./auth.types";
 import { resolveAppRole } from "./resolve-app-role";
 
-const tokenEndpoint =
-  `${process.env.API_URL}/api/token/`;
+const tokenEndpoint = `${process.env.API_URL}/api/token/`;
 
 const tokenResponseSchema = z.object({
   access: z.string().min(1),
@@ -42,10 +38,7 @@ function decodeJwtPayload(token: string): unknown {
   }
 
   try {
-    const payload = Buffer.from(
-      segments[1],
-      "base64url",
-    ).toString("utf8");
+    const payload = Buffer.from(segments[1], "base64url").toString("utf8");
 
     return JSON.parse(payload) as unknown;
   } catch {

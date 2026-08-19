@@ -1,10 +1,18 @@
-export const timesheetStatus = ["Pending", "In Progress", "Submitted", "Approved", "Completed", "DRAFT"] as const;
+export const timesheetStatus = [
+  "Pending",
+  "In Progress",
+  "Submitted",
+  "Approved",
+  "Completed",
+  "DRAFT",
+] as const;
 
 export type Timesheetstatus = (typeof timesheetStatus)[number];
 
 export interface TimesheetSubmission {
   id: string;
-  target_date: string;
+  to_week: string;
+  from_week: string;
   uploaded_by: string;
   uploader_name: string;
   created_at: string;

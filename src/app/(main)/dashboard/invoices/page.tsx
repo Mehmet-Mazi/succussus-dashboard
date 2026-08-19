@@ -1,9 +1,17 @@
+import { apiFetch } from "@/lib/auth/client";
 import { InvoiceList } from "./_components/invoice-list";
 
-export default function InvoicesPage() {
+async function getInvoiceData() {
+  const response = await apiFetch("/api/dashboard/invoices/");
+  return response;
+}
+
+export default async function InvoicesPage() {
+  const invoiceData = await getInvoiceData();
+  console.log(invoiceData);
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <InvoiceList />
+      <InvoiceList invoiceData={invoiceData} />
     </div>
   );
 }
