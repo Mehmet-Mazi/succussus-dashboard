@@ -45,7 +45,7 @@ export const roleAccess: Record<AppRole, RoleAccess> = {
 
 export const roleHomeRoutes: Record<AppRole, AppRoute> = {
   admin: "/dashboard/default",
-  director: "/dashboard/default",
+  director: "/dashboard/timesheets",
   manager: "/dashboard/timesheets",
   guest: "/auth/v1/login",
 };
