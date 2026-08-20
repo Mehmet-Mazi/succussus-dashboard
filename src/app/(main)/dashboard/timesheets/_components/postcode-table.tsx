@@ -7,13 +7,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Check, CornerLeftUpIcon, PencilLine, Trash2 } from "lucide-react";
+import { CalendarIcon, Check, CornerLeftUpIcon, PencilLine, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { enGB } from "date-fns/locale";
 
 export type PostcodeRate = {
   id: string;
-  date: string;
+  effective_from: string;
   postcode: string;
   rate: string | number;
 };
@@ -63,7 +67,7 @@ export default function PostcodeTable({
     const newRates = [
       ...editPostcode,
       {
-        date: new Date().toLocaleDateString("en-UK"),
+        effective_from: format(new Date(), "yyyy-MM-dd"),
         id: crypto.randomUUID(),
         postcode: "",
         rate: 0,
@@ -85,26 +89,40 @@ export default function PostcodeTable({
           </Button>
         </div>
       </div>
-      <Table className="mt-3 table-fixed w-full **:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4 **:data-[slot='table-cell']:py-4">
-        <TableHeader className="sticky top-0 left-0 border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground">
-          <TableRow>
-            <TableHead className="bg-background text-center">
+      <Table className="mt-3 table-fixed w-full ">
+        <TableHeader className="w-full sticky top-0 left-0 border-t">
+          <TableRow className="w-full">
+            <TableHead className="bg-background text-center w-1/5">
               Active From
             </TableHead>
-            <TableHead className="bg-background text-center">
+            <TableHead className="bg-background text-center w-1/5">
               Postcode
             </TableHead>
-            <TableHead className="bg-background text-center">Rate</TableHead>
-            <TableHead className="bg-background text-center">Edit</TableHead>
-            <TableHead className="bg-background text-center">Delete</TableHead>
+            <TableHead className="bg-background text-center w-1/5">Rate</TableHead>
+            <TableHead className="bg-background text-center w-1/5">Edit</TableHead>
+            <TableHead className="bg-background text-center w-1/5">Delete</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="w-full overflow-auto">
           {editPostcode.length > 0 ? (
             editPostcode.map((postcode, index) => (
               <TableRow key={postcode.id}>
-                <TableCell className="text-center font-medium">
-                  {postcode.date}
+                <TableCell className="text-center font-medium overflow-visible">
+                  {editingKey === postcode.id ? (
+                    <CalenderDatePicker
+                      date={postcode.effective_from ? new Date(postcode.effective_from) : undefined}
+                      setDate={(newDate) => {
+                        // 2. Convert the Date object from the calendar back into a 'yyyy-MM-dd' string
+                        if (newDate instanceof Date && !isNaN(newDate.getTime())) {
+                          const stringDate = format(newDate, "yyyy-MM-dd");
+                          inputHandler(postcode, { effective_from: stringDate });
+                        }
+                      }}
+                    />
+                  )
+                    :
+                    postcode.effective_from
+                  }
                 </TableCell>
                 <TableCell className="text-center font-medium">
                   {editingKey === postcode.id ? (
@@ -128,7 +146,7 @@ export default function PostcodeTable({
                     <Input
                       type="number"
                       onInput={(e) =>
-                        inputHandler(postcode, { rate: e.currentTarget.value })
+                        inputHandler(postcode, { rate: Number(e.currentTarget.value) })
                       }
                       defaultValue={postcode.rate}
                     />
@@ -176,5 +194,42 @@ export default function PostcodeTable({
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+
+function CalenderDatePicker({ date, setDate }: { date: Date; setDate: (date: Date) => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          data-empty={!date}
+          className="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
+        >
+          {date ? format(date, "dd MMM yyyy", { locale: enGB }) : "Select date"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <Calendar
+          className="w-full"
+          mode="single"
+          locale={enGB}
+          selected={date}
+          defaultMonth={date}
+          onSelect={(selectedDate) => {
+            if (!selectedDate) {
+              return;
+            }
+
+            setDate(selectedDate);
+            setOpen(false);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

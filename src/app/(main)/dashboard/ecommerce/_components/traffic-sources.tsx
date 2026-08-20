@@ -10,14 +10,14 @@ import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 const trafficSources = [
   {
-    name: "Meta",
+    name: "Wickes",
     visits: "5,640",
     share: 38,
     change: "+18%",
     icon: siMeta,
   },
   {
-    name: "Google",
+    name: "Fraser House",
     visits: "3,740",
     share: 25,
     change: "-6%",
@@ -160,9 +160,9 @@ export function TrafficSources() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Traffic Sources</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Income Sources</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          14.8K visits
+          14.8K earned
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />

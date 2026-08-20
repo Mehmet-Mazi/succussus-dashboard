@@ -14,6 +14,9 @@ function formatValue(value: number, format: KpiValueFormat) {
   if (format === "percentage") {
     return `${value}%`;
   }
+  if (format === "custom") {
+    return value
+  }
 
   return new Intl.NumberFormat("en-GB").format(value);
 }
@@ -66,42 +69,42 @@ export function TimesheetKpiCards() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {/* {summaryCards.map((card) => { */}
         {timesheetKpis.map((card) => {
-        const isIncrease = card.comparison >= 0;
+          const isIncrease = card.comparison >= 0;
 
-        return (
-          <Card key={card.label}>
-            <CardHeader>
-              <CardDescription>{card.label}</CardDescription>
-              <CardAction>
-                <ArrowUpRight className="size-4" />
-              </CardAction>
-            </CardHeader>
+          return (
+            <Card key={card.label}>
+              <CardHeader>
+                <CardDescription>{card.label}</CardDescription>
+                <CardAction>
+                  <ArrowUpRight className="size-4" />
+                </CardAction>
+              </CardHeader>
 
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl leading-none tracking-tight">{formatValue(card.value, card.valueFormat)}</span>
+              <CardContent className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl leading-none tracking-tight">{formatValue(card.value, card.valueFormat)}</span>
 
-                <Badge
+                  <Badge
                     variant="outline"
                     className={
-                        isIncrease
+                      isIncrease
                         ? "border-green-200 bg-green-500/10 text-green-700 dark:border-green-900/40 dark:bg-green-500/15 dark:text-green-300"
                         : "border-destructive/20 bg-destructive/10 text-destructive"
                     }
-                    >
+                  >
                     {isIncrease ? <TrendingUp /> : <TrendingDown />}
                     {formatComparison(card.comparison)}
-                </Badge>
-              </div>
+                  </Badge>
+                </div>
 
-              <p className="text-sm">
-                <span className="font-medium text-foreground">{formatValue(card.previousValue, card.previousValueFormat)}</span>{" "}
-                <span className="text-muted-foreground">{card.previousLabel}</span>
-              </p>
-            </CardContent>
-          </Card>
-        );
-    })}
+                <p className="text-sm">
+                  <span className="font-medium text-foreground">{formatValue(card.previousValue, card.previousValueFormat)}</span>{" "}
+                  <span className="text-muted-foreground">{card.previousLabel}</span>
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </section>
   );

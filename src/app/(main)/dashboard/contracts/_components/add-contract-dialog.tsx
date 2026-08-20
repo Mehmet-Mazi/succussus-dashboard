@@ -22,10 +22,41 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClientRecord } from "./contract-data";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-import { contractClients } from "./contract-data";
+type DateRange = { from: Date; to: Date }
+export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }) {
+  const router = useRouter()
+  const [date, setDate] = React.useState<DateRange>({
+    from: new Date(),
+    to: new Date(),
+  });
+  const handleForm = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    formData.append("effective_from", date.from.toISOString())
+    if (date.to) {
+      formData.append("effective_to", date.to.toISOString())
+    }
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value)
+    }
+    try {
+      const response = await fetch("/api/contracts/upload", {
+        method: "POST",
+        body: formData,
+      })
+      const result = await response.json();
+      toast.success(result.message);
+    } catch {
+      toast.error("Failed to create contract. Please try again later.");
+    } finally {
+      router.refresh();
+    }
 
-export function AddContractDialog() {
+  }
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -43,7 +74,7 @@ export function AddContractDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <form className="flex flex-col gap-5" onSubmit={(event) => event.preventDefault()}>
+        <form className="flex flex-col gap-5" onSubmit={handleForm}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="contract-file">Contract file</FieldLabel>
@@ -63,22 +94,22 @@ export function AddContractDialog() {
                   <FileUp className="size-5 text-muted-foreground" />
                 </span>
                 <span className="font-medium text-sm">Choose a contract file</span>
-                <span className="text-muted-foreground text-xs">PDF, DOC or DOCX up to 20 MB</span>
+                <span className="text-muted-foreground text-xs">PNG, JPEG, WebP, and <br /> other common doc formats up to 20 MB</span>
               </label>
-              <Input id="contract-file" type="file" accept=".pdf,.doc,.docx" className="sr-only" />
+              <Input id="contract-file" type="file" accept=".png,.jpg,.webp, .pdf, .docx, .doc" className="sr-only" name="file" />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="contract-client">Client</FieldLabel>
-                <Select>
+                <Select name="client">
                   <SelectTrigger id="contract-client" className="w-full">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
                   <SelectContent>
-                    {contractClients.map((client) => (
+                    {clientData.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
-                        {client.name}
+                        {client.account_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -87,50 +118,38 @@ export function AddContractDialog() {
 
               <Field>
                 <FieldLabel htmlFor="contract-name">Contract name</FieldLabel>
-                <Input id="contract-name" placeholder="e.g. Last Mile 2026" />
+                <Input id="contract-name" placeholder="e.g. Last Mile 2026" name="name" />
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="contract-start-date">Start date</FieldLabel>
-                <ContractDatePicker id="contract-start-date" />
+                <ContractDatePicker id="contract-start-date" date={date.from} setDate={(value) => setDate({ ...date, from: value })} />
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="contract-end-date">End date</FieldLabel>
-                <ContractDatePicker id="contract-end-date" />
+                <ContractDatePicker id="contract-end-date" date={date.to} setDate={(value) => setDate({ ...date, to: value })} />
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="contract-service">Service</FieldLabel>
-                <Select>
-                  <SelectTrigger id="contract-service" className="w-full">
-                    <SelectValue placeholder="Select a service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="last-mile">Last-mile delivery</SelectItem>
-                    <SelectItem value="regional">Regional distribution</SelectItem>
-                    <SelectItem value="parcel">Parcel delivery</SelectItem>
-                    <SelectItem value="freight">Freight operations</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input placeholder="O/N, ECON..." name="name" />
               </Field>
 
               <div className="grid grid-cols-[1fr_8rem] gap-2">
                 <Field>
                   <FieldLabel htmlFor="contract-rate">Rate</FieldLabel>
-                  <Input id="contract-rate" type="number" min="0" step="0.01" placeholder="0.00" />
+                  <Input id="contract-rate" type="number" min="0" step="0.01" placeholder="0.00" name="rate" />
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="contract-rate-unit">Unit</FieldLabel>
-                  <Select defaultValue="per-stop">
+                  <Select defaultValue="STOP" name="rate_type">
                     <SelectTrigger id="contract-rate-unit" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="per-stop">Per stop</SelectItem>
-                      <SelectItem value="per-route">Per route</SelectItem>
-                      <SelectItem value="per-day">Per day</SelectItem>
-                      <SelectItem value="per-hour">Per hour</SelectItem>
+                      <SelectItem value="STOP">Per stop</SelectItem>
+                      <SelectItem value="DAY">Per day</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -154,9 +173,8 @@ export function AddContractDialog() {
   );
 }
 
-function ContractDatePicker({ id }: { id: string }) {
+function ContractDatePicker({ id, date, setDate }: { id: string; date: Date; setDate: (date: Date) => void }) {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date>();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

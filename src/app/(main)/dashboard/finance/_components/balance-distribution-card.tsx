@@ -17,31 +17,31 @@ const balanceData: {
   key: BalanceKey;
   percentage: number;
 }[] = [
-  {
-    account: "Main Wallet",
-    amount: 122_540,
-    key: "main",
-    percentage: 52.2,
-  },
-  {
-    account: "Savings Account",
-    amount: 48_320,
-    key: "savings",
-    percentage: 20.6,
-  },
-  {
-    account: "Investment Account",
-    amount: 36_780,
-    key: "investment",
-    percentage: 15.7,
-  },
-  {
-    account: "Reserve Account",
-    amount: 27_256,
-    key: "reserve",
-    percentage: 11.5,
-  },
-];
+    {
+      account: "Main Wallet",
+      amount: 122_540,
+      key: "main",
+      percentage: 52.2,
+    },
+    {
+      account: "Savings Account",
+      amount: 48_320,
+      key: "savings",
+      percentage: 20.6,
+    },
+    {
+      account: "Investment Account",
+      amount: 36_780,
+      key: "investment",
+      percentage: 15.7,
+    },
+    {
+      account: "Reserve Account",
+      amount: 27_256,
+      key: "reserve",
+      percentage: 11.5,
+    },
+  ];
 
 const chartConfig = {
   amount: {
@@ -66,14 +66,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const currencies = {
-  EUR: {
-    label: "Euro Balance",
-  },
   GBP: {
     label: "GBP Balance",
-  },
-  USD: {
-    label: "USD Balance",
   },
 } as const;
 
@@ -92,7 +86,7 @@ const chartData = balanceData.map((item) => ({
 const totalBalance = balanceData.reduce((total, item) => total + item.amount, 0);
 
 export function BalanceDistributionCard() {
-  const [currency, setCurrency] = React.useState<Currency>("USD");
+  const [currency, setCurrency] = React.useState<Currency>("GBP");
 
   return (
     <Card>

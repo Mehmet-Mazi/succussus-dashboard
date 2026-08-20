@@ -122,23 +122,22 @@ export function RealtimeVisitors() {
         </ChartContainer>
         <div className="grid grid-cols-2">
           <div className="flex items-center gap-3 border-border/50 border-r border-b pt-1 pr-5 pb-4">
-            <span aria-hidden="true" className="flag:US shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">United States</span>
+            <span aria-hidden="true" className="flag:GB shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
             <span className="text-sm tabular-nums">14</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-b pt-1 pb-4 pl-5">
-            <span aria-hidden="true" className="flag:GB shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">United Kingdom</span>
+            <span aria-hidden="true" className="flag:FR shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">France</span>
             <span className="text-sm tabular-nums">4</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-r pt-4 pr-5 pb-1">
-            <span aria-hidden="true" className="flag:CA shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Canada</span>
+            <span aria-hidden="true" className="flag:TR shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">Turkey</span>
             <span className="text-sm tabular-nums">3</span>
           </div>
           <div className="flex items-center gap-3 pt-4 pb-1 pl-5">
-            <span aria-hidden="true" className="flag:IN shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">India</span>
+            <span aria-hidden="true" className="flag:ES shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">Spain</span>
             <span className="text-sm tabular-nums">3</span>
           </div>
         </div>

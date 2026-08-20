@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRef, useState } from "react";
-import { Calendar, FileCheck, FileUp, Upload } from "lucide-react";
+import { Calendar, FileCheck, FileUp, Settings, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -111,7 +111,7 @@ export default function UploadTimesheet() {
           <DialogHeader>
             <DialogTitle>Upload new timesheeet</DialogTitle>
             <DialogDescription>
-              Upload the excel sheet and enter the rules the timesheet will use.
+              Upload the excel sheet and <span className="font-bold text-destructive">use the <Settings className="inline-block" size={16} /> to define rules the timesheet will use.</span>
             </DialogDescription>
           </DialogHeader>
 
@@ -175,7 +175,7 @@ export default function UploadTimesheet() {
                       </span>
                       <span className="font-medium text-sm">Choose a file</span>
                       <span className="text-muted-foreground text-xs">
-                        PDF, DOC or DOCX up to 20 MB
+                        .xlsx, .xls, .csv up to 20 MB
                       </span>
                     </>
                   )}

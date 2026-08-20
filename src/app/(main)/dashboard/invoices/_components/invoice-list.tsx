@@ -463,7 +463,11 @@ export function InvoiceList({ invoiceData }: { invoiceData: InvoiceRecord[] }) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link href={invoice.file}>
+                            <Link
+                              href={invoice.file}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               View invoice
                               <Eye />
                             </Link>
@@ -471,7 +475,7 @@ export function InvoiceList({ invoiceData }: { invoiceData: InvoiceRecord[] }) {
                           <DropdownMenuItem disabled>
                             Edit invoice
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="bg-green-50">
+                          <DropdownMenuItem className="bg-green-100 dark:bg-green-800">
                             Send Invoice <Send />
                           </DropdownMenuItem>
                         </DropdownMenuContent>

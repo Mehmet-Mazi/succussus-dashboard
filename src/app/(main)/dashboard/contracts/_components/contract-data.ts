@@ -1,7 +1,8 @@
-export interface ContractClient {
+export interface ClientRecord {
   id: string;
-  name: string;
-  code: string;
+  account_name: string;
+  account_no: string;
+  contracts: ContractRecord[]
 }
 
 export type ContractRateUnit = "per stop" | "per route" | "per day" | "per hour";
@@ -10,62 +11,18 @@ export type ContractStatus = "active" | "upcoming" | "expired";
 export interface ContractRecord {
   id: string;
   name: string;
-  clientId: string;
+  client: string;
   service: string;
-  startDate: string;
-  endDate: string;
+  effective_from: string;
+  effective_to: string;
   rate: number;
-  rateUnit: ContractRateUnit;
-  fileName: string;
-  fileSize: string;
-  uploadedAt: string;
-  uploadedBy: string;
+  rate_type: ContractRateUnit;
+  file: string;
+  file_name: string;
+  file_size: string;
+  uploaded_at: string;
+  uploaded_by_name: string;
 }
-
-const featuredContractClients: ContractClient[] = [
-  { id: "apex-logistics", name: "Apex Logistics", code: "AL" },
-  { id: "northstar-delivery", name: "Northstar Delivery", code: "ND" },
-  { id: "swift-parcel", name: "Swift Parcel", code: "SP" },
-  { id: "urban-freight", name: "Urban Freight", code: "UF" },
-];
-
-const clientPrefixes = [
-  "Apex",
-  "Northstar",
-  "Swift",
-  "Urban",
-  "Horizon",
-  "Summit",
-  "Riverside",
-  "Crown",
-  "Metro",
-  "Beacon",
-] as const;
-
-const clientSpecialisms = [
-  "Logistics",
-  "Delivery",
-  "Parcel",
-  "Freight",
-  "Transport",
-  "Distribution",
-  "Couriers",
-] as const;
-
-const featuredClientNames = new Set(featuredContractClients.map((client) => client.name));
-const generatedContractClients: ContractClient[] = clientPrefixes
-  .flatMap((prefix) => clientSpecialisms.map((specialism) => `${prefix} ${specialism}`))
-  .filter((name) => !featuredClientNames.has(name))
-  .map((name, index) => ({
-    id: name.toLowerCase().replace(/\s+/g, "-"),
-    name,
-    code: `C${String(index + 5).padStart(3, "0")}`,
-  }));
-
-export const contractClients: ContractClient[] = [
-  ...featuredContractClients,
-  ...generatedContractClients,
-];
 
 const featuredContractTestData: ContractRecord[] = [
   {
@@ -190,13 +147,13 @@ const serviceOptions: ReadonlyArray<{
   rateUnit: ContractRateUnit;
   baseRate: number;
 }> = [
-  { name: "Last-mile delivery", rateUnit: "per stop", baseRate: 2.2 },
-  { name: "Regional distribution", rateUnit: "per route", baseRate: 175 },
-  { name: "Parcel delivery", rateUnit: "per stop", baseRate: 2.65 },
-  { name: "Freight operations", rateUnit: "per hour", baseRate: 23.5 },
-  { name: "Driver support", rateUnit: "per day", baseRate: 140 },
-  { name: "Weekend delivery", rateUnit: "per stop", baseRate: 3.05 },
-];
+    { name: "Last-mile delivery", rateUnit: "per stop", baseRate: 2.2 },
+    { name: "Regional distribution", rateUnit: "per route", baseRate: 175 },
+    { name: "Parcel delivery", rateUnit: "per stop", baseRate: 2.65 },
+    { name: "Freight operations", rateUnit: "per hour", baseRate: 23.5 },
+    { name: "Driver support", rateUnit: "per day", baseRate: 140 },
+    { name: "Weekend delivery", rateUnit: "per stop", baseRate: 3.05 },
+  ];
 
 const uploaders = ["Joe W", "Mehmet K", "Olivia M", "Noah P"] as const;
 
@@ -224,61 +181,10 @@ function getTargetContractCount(clientIndex: number) {
   return 4;
 }
 
-const generatedClientAssignments = contractClients.flatMap((client, clientIndex) => {
-  const existingContractCount = featuredContractTestData.filter(
-    (contract) => contract.clientId === client.id,
-  ).length;
-  const generatedCount = getTargetContractCount(clientIndex) - existingContractCount;
-
-  return Array.from({ length: generatedCount }, () => client);
-});
-
-const generatedContractCount = generatedClientAssignments.length;
 
 function toIsoDate(timestamp: number) {
   return new Date(timestamp).toISOString().slice(0, 10);
 }
-
-const generatedContractTestData: ContractRecord[] = Array.from(
-  { length: generatedContractCount },
-  (_, index) => {
-    const contractNumber = 1009 + index;
-    const client = generatedClientAssignments[index];
-    const service = serviceOptions[index % serviceOptions.length];
-    const dateProgress = index / (generatedContractCount - 1);
-    const startTimestamp = Math.round(
-      generatedRangeStart + (generatedRangeEnd - generatedRangeStart) * dateProgress,
-    );
-    const durationDays = 180 + (index % 13) * 30;
-    const endTimestamp = startTimestamp + durationDays * dayInMilliseconds;
-    const rateIncrement = service.rateUnit === "per stop" ? (index % 25) * 0.04 : index % 25;
-    const id = `CTR-${contractNumber}`;
-
-    return {
-      id,
-      name: `${client.name} ${service.name} ${contractNumber}`,
-      clientId: client.id,
-      service: service.name,
-      startDate: toIsoDate(startTimestamp),
-      endDate: toIsoDate(endTimestamp),
-      rate: Number((service.baseRate + rateIncrement).toFixed(2)),
-      rateUnit: service.rateUnit,
-      fileName: `${client.code.toLowerCase()}-${contractNumber}-contract.pdf`,
-      fileSize: `${(1.2 + (index % 32) * 0.1).toFixed(1)} MB`,
-      uploadedAt: new Date(startTimestamp).toISOString(),
-      uploadedBy: uploaders[index % uploaders.length],
-    };
-  },
-);
-
-export const contractTestData: ContractRecord[] = [
-  ...featuredContractTestData,
-  ...generatedContractTestData,
-].sort(
-  (firstContract, secondContract) =>
-    secondContract.startDate.localeCompare(firstContract.startDate) ||
-    secondContract.id.localeCompare(firstContract.id),
-);
 
 const demoDate = "2026-08-06";
 

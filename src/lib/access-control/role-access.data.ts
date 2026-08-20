@@ -24,6 +24,8 @@ export const roleAccess: Record<AppRole, RoleAccess> = {
       "/dashboard/tasks",
       "/dashboard/contracts",
       "/dashboard/files-manager",
+      "/dashboard/users",
+      "/dashboard/roles",
       "/dashboard/timesheets",
       "/dashboard/invoices",
       //...authenticationRoutes,

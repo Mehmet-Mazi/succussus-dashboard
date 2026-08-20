@@ -12,6 +12,7 @@ import { QuickActions } from "./_components/quick-actions";
 import { TransactionsOverviewCard } from "./_components/transactions-overview-card";
 import { UpcomingTransactions } from "./_components/upcoming-transactions";
 import { Wallet } from "./_components/wallet";
+import { TrafficSources } from "../ecommerce/_components/traffic-sources";
 
 export default function Page() {
   const formattedDate = format(new Date(), "EEEE, do MMMM yyyy");
@@ -68,7 +69,10 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+          <div>
+            <TrafficSources />
+          </div>
+          <div className="hidden grid-cols-1 gap-4 xl:grid-cols-12">
             <div className="xl:col-span-4">
               <Wallet />
             </div>

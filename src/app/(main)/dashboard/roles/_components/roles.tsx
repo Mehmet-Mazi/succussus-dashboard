@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { rolesColumns } from "./roles-table/columns";
 import type { Role } from "./roles-table/data";
 import { RolesTable } from "./roles-table/table";
+import { Card } from "@/components/ui/card";
 
 function getRoleTypeFilter(groupFilter: string) {
   if (groupFilter === "System roles") {
@@ -121,7 +122,7 @@ export function Roles({ roles }: { roles: Role[] }) {
               </AlertAction>
             </Alert>
 
-            <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
+            <Card className="overflow-hidden rounded-xl border border-border/70">
               <div className="flex flex-col items-stretch gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                 <InputGroup className="h-7 w-full rounded-md sm:w-82">
                   <InputGroupAddon>
@@ -204,7 +205,7 @@ export function Roles({ roles }: { roles: Role[] }) {
               </div>
 
               <RolesTable table={table} />
-            </div>
+            </Card>
           </div>
         </TabsContent>
         <TabsContent value="permission-sets">

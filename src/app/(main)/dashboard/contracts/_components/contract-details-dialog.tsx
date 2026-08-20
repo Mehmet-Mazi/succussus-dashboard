@@ -4,6 +4,7 @@ import { CalendarDays, Download, FileText, PoundSterling } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { returnFileSize } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +15,12 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 
-import type { ContractClient, ContractRecord, ContractStatus } from "./contract-data";
+import type { ClientRecord, ContractRecord, ContractStatus } from "./contract-data";
+import Link from "next/link";
 
 interface ContractDetailsDialogProps {
   contract: ContractRecord | null;
-  client: ContractClient | null;
+  client: ClientRecord | null;
   status: ContractStatus | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -46,7 +48,7 @@ function formatDate(value: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(`${value}T00:00:00Z`));
+  }).format(new Date(value));
 }
 
 export function ContractDetailsDialog({
@@ -73,7 +75,7 @@ export function ContractDetailsDialog({
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <DialogTitle>{contract.name}</DialogTitle>
-              <DialogDescription>{client.name}</DialogDescription>
+              <DialogDescription>{client.account_name}</DialogDescription>
             </div>
             <Badge variant="outline" className={statusClasses[status]}>
               {formatStatus(status)}
@@ -89,7 +91,7 @@ export function ContractDetailsDialog({
               <FileText className="size-3.5" />
               Service
             </div>
-            <p className="font-medium">{contract.service}</p>
+            <p className="font-medium">{contract.name}</p>
           </div>
           <div className="rounded-lg bg-muted/40 p-3">
             <div className="mb-1 flex items-center gap-2 text-muted-foreground text-xs">
@@ -97,7 +99,7 @@ export function ContractDetailsDialog({
               Standard rate
             </div>
             <p className="font-medium">
-              £{contract.rate.toFixed(2)} {contract.rateUnit}
+              £{contract.rate} / {contract.rate_type}
             </p>
           </div>
           <div className="rounded-lg bg-muted/40 p-3 sm:col-span-2">
@@ -106,7 +108,7 @@ export function ContractDetailsDialog({
               Contract term
             </div>
             <p className="font-medium">
-              {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
+              {formatDate(contract.effective_from)} – {formatDate(contract.effective_to)}
             </p>
           </div>
         </div>
@@ -123,15 +125,17 @@ export function ContractDetailsDialog({
                 <FileText className="size-4" />
               </div>
               <div className="min-w-0">
-                <p className="truncate font-medium">{contract.fileName}</p>
+                <p className="truncate font-medium">{contract.file_name}</p>
                 <p className="text-muted-foreground text-xs">
-                  {contract.fileSize} · Uploaded by {contract.uploadedBy}
+                  {returnFileSize(Number(contract.file_size))} · Uploaded by {contract.uploaded_by_name}
                 </p>
               </div>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={onDownload}>
-              <Download data-icon="inline-start" />
-              Download
+            <Button asChild type="button" variant="outline" size="sm" onClick={onDownload}>
+              <Link href={contract.file}>
+                <Download data-icon="inline-start" />
+                Download
+              </Link>
             </Button>
           </div>
         </div>

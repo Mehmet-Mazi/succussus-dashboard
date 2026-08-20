@@ -42,14 +42,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AddContractDialog } from "./add-contract-dialog";
 import {
-  type ContractClient,
   type ContractRecord,
   type ContractStatus,
-  contractClients,
-  contractTestData,
   getContractStatus,
+  ClientRecord,
 } from "./contract-data";
 import { ContractDetailsDialog } from "./contract-details-dialog";
+import { useRouter } from "next/navigation";
 
 const contractViews = ["client", "contract"] as const;
 
@@ -80,22 +79,23 @@ function formatDate(value: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(`${value}T00:00:00Z`));
+  }).format(new Date(value));
 }
 
 function matchesContractSearch(
   contract: ContractRecord,
-  client: ContractClient | undefined,
+  client: ClientRecord | undefined,
   normalizedQuery: string,
 ) {
-  return [contract.name, contract.id, contract.service, client?.name]
+
+  return [contract.name, contract.id, contract.name, client?.account_name]
     .filter(Boolean)
-    .some((value) => value?.toLowerCase().includes(normalizedQuery));
+    .some((value) => String(value)?.toLowerCase().includes(normalizedQuery));
 }
 
 interface ContractRowProps {
   contract: ContractRecord;
-  client: ContractClient | undefined;
+  client: ClientRecord | undefined;
   showClient: boolean;
   nested?: boolean;
   onView: (contract: ContractRecord) => void;
@@ -148,13 +148,13 @@ function ContractRow({
           </div>
         </div>
       </TableCell>
-      {showClient && <TableCell>{client?.name}</TableCell>}
+      {showClient && <TableCell>{client?.account_name}</TableCell>}
       <TableCell className="text-muted-foreground">
-        {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
+        {formatDate(contract.effective_from)} – {formatDate(contract.effective_to)}
       </TableCell>
-      <TableCell>{contract.service}</TableCell>
+      <TableCell>{contract.name}</TableCell>
       <TableCell className="font-medium tabular-nums">
-        £{contract.rate.toFixed(2)} {contract.rateUnit}
+        £{contract.rate} / {contract.rate_type}
       </TableCell>
       <TableCell>
         <Badge variant="outline" className={statusClasses[status]}>
@@ -196,7 +196,8 @@ function ContractRow({
   );
 }
 
-export function ContractVault() {
+export function ContractVault({ clientData }: { clientData: ClientRecord[] }) {
+  const router = useRouter()
   const [view, setView] = React.useState<ContractView>("client");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [expandedClientIds, setExpandedClientIds] = React.useState<Set<string>>(
@@ -208,18 +209,15 @@ export function ContractVault() {
   const [pageIndex, setPageIndex] = React.useState(0);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
-  const visibleContracts = contractTestData.filter((contract) => {
-    const client = contractClients.find(
-      (item) => item.id === contract.clientId,
+  const visibleContracts = clientData.flatMap(client => client.contracts.filter((contract) => (
+    matchesContractSearch(contract, client, normalizedQuery)
+  )
+  ));
+  const visibleClients = clientData.filter((client) => {
+    const clientContracts = client.contracts.filter(
+      (contract) => contract.client === client.id,
     );
-
-    return matchesContractSearch(contract, client, normalizedQuery);
-  });
-  const visibleClients = contractClients.filter((client) => {
-    const clientContracts = contractTestData.filter(
-      (contract) => contract.clientId === client.id,
-    );
-    const clientMatches = client.name.toLowerCase().includes(normalizedQuery);
+    const clientMatches = client.account_name.toLowerCase().includes(normalizedQuery);
 
     return (
       clientMatches ||
@@ -245,21 +243,21 @@ export function ContractVault() {
     view === "client" ? paginatedClients.length : paginatedContracts.length;
 
   const selectedContractClient =
-    contractClients.find(
-      (client) => client.id === selectedContract?.clientId,
+    clientData.find(
+      (client) => client.id === selectedContract?.client,
     ) ?? null;
   const selectedContractStatus = selectedContract
     ? getContractStatus(selectedContract)
     : null;
 
-  function toggleClient(clientId: string) {
+  function toggleClient(client: string) {
     setExpandedClientIds((currentIds) => {
       const nextIds = new Set(currentIds);
 
-      if (nextIds.has(clientId)) {
-        nextIds.delete(clientId);
+      if (nextIds.has(client)) {
+        nextIds.delete(client);
       } else {
-        nextIds.add(clientId);
+        nextIds.add(client);
       }
 
       return nextIds;
@@ -267,8 +265,9 @@ export function ContractVault() {
   }
 
   function previewDownload(contract: ContractRecord) {
+    router.push(contract.file)
     toast.info(
-      `Download for ${contract.fileName} will be connected when the API is available.`,
+      `Download for ${contract.file_name} will begin shortly.`,
     );
   }
 
@@ -285,6 +284,7 @@ export function ContractVault() {
     }
   }
 
+  console.log(clientData)
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -296,32 +296,14 @@ export function ContractVault() {
             Manage client contracts and the rates used to generate invoices.
           </p>
         </div>
-        <AddContractDialog />
+        <AddContractDialog clientData={clientData} />
       </div>
 
       <section
         className="flex flex-col gap-3"
         aria-labelledby="contracts-heading"
       >
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <Tabs
-            value={view}
-            onValueChange={(value) => {
-              if (isContractView(value)) {
-                setView(value);
-                setPageIndex(0);
-              }
-            }}
-          >
-            <TabsList>
-              <TabsTrigger value="client" className="px-4">
-                Client
-              </TabsTrigger>
-              <TabsTrigger value="contract" className="px-4">
-                Contract
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
 
           <InputGroup className="md:max-w-sm">
             <InputGroupInput
@@ -345,154 +327,152 @@ export function ContractVault() {
 
         <Card>
           <CardContent className="flex flex-col gap-4 px-0">
-            <Table className="table-fixed">
-              {view === "client" ? (
-                <>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[30ch]">
-                        Client / Contract
-                      </TableHead>
-                      <TableHead className="w-[20ch]">Term</TableHead>
-                      <TableHead className="w-[15ch]">Service</TableHead>
-                      <TableHead className="w-[15ch]">Rate</TableHead>
-                      <TableHead className="w-[15ch]">Status</TableHead>
-                      <TableHead className="w-[10ch] text-center">
-                        Actions
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedClients.length > 0 ? (
-                      paginatedClients.map((client) => {
-                        const allClientContracts = contractTestData.filter(
-                          (contract) => contract.clientId === client.id,
+            {view === "client" ? (
+              <Table className="table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30ch]">
+                      Client / Contract
+                    </TableHead>
+                    <TableHead className="w-[20ch]">Term</TableHead>
+                    <TableHead className="w-[15ch]">Service</TableHead>
+                    <TableHead className="w-[15ch]">Rate</TableHead>
+                    <TableHead className="w-[15ch]">Status</TableHead>
+                    <TableHead className="w-[10ch] text-center">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedClients.length > 0 ? (
+                    paginatedClients.map((client) => {
+                      const allClientContracts = clientData.flatMap(client => client.contracts.filter(
+                        (contract) => contract.client === client.id,
+                      ));
+                      const clientNameMatches = client.account_name
+                        .toLowerCase()
+                        .includes(normalizedQuery);
+                      const clientContracts = clientNameMatches
+                        ? allClientContracts
+                        : allClientContracts.filter((contract) =>
+                          matchesContractSearch(
+                            contract,
+                            client,
+                            normalizedQuery,
+                          ),
                         );
-                        const clientNameMatches = client.name
-                          .toLowerCase()
-                          .includes(normalizedQuery);
-                        const clientContracts = clientNameMatches
-                          ? allClientContracts
-                          : allClientContracts.filter((contract) =>
-                              matchesContractSearch(
-                                contract,
-                                client,
-                                normalizedQuery,
-                              ),
-                            );
-                        const activeContracts = allClientContracts.filter(
-                          (contract) =>
-                            getContractStatus(contract) === "active",
-                        ).length;
-                        const isExpanded =
-                          expandedClientIds.has(client.id) ||
-                          (normalizedQuery.length > 0 &&
-                            clientContracts.length > 0);
+                      const activeContracts = allClientContracts.filter(
+                        (contract) =>
+                          getContractStatus(contract) === "active",
+                      ).length;
+                      const isExpanded =
+                        expandedClientIds.has(client.id) ||
+                        (normalizedQuery.length > 0 &&
+                          clientContracts.length > 0);
 
-                        return (
-                          <React.Fragment key={client.id}>
-                            <TableRow className="bg-muted/30 hover:bg-muted/50">
-                              <TableCell>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  className="h-auto justify-start px-2 py-1.5"
-                                  aria-expanded={isExpanded}
-                                  onClick={() => toggleClient(client.id)}
-                                >
-                                  {isExpanded ? (
-                                    <ChevronDown />
-                                  ) : (
-                                    <ChevronRight />
-                                  )}
-                                  <span className="font-semibold">
-                                    {client.name}
-                                  </span>
-                                  <span className="text-muted-foreground text-xs">
-                                    {allClientContracts.length} contracts
-                                  </span>
-                                </Button>
-                              </TableCell>
-                              <TableCell
-                                colSpan={3}
-                                className="text-muted-foreground"
-                              ></TableCell>
-                              <TableCell>
-                                <Badge variant="secondary">
-                                  {activeContracts} active
-                                </Badge>
-                              </TableCell>
-                              <TableCell />
-                            </TableRow>
+                      return (
+                        <React.Fragment key={client.id}>
+                          <TableRow className="bg-muted/30 hover:bg-muted/50">
+                            <TableCell>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                className="h-auto justify-start px-2 py-1.5"
+                                aria-expanded={isExpanded}
+                                onClick={() => toggleClient(client.id)}
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown />
+                                ) : (
+                                  <ChevronRight />
+                                )}
+                                <span className="font-semibold">
+                                  {client.account_name}
+                                </span>
+                                <span className="text-muted-foreground text-xs">
+                                  {allClientContracts.length} contracts
+                                </span>
+                              </Button>
+                            </TableCell>
+                            <TableCell
+                              colSpan={3}
+                              className="text-muted-foreground"
+                            ></TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {activeContracts} active
+                              </Badge>
+                            </TableCell>
+                            <TableCell />
+                          </TableRow>
 
-                            {isExpanded &&
-                              clientContracts.map((contract) => (
-                                <ContractRow
-                                  key={contract.id}
-                                  contract={contract}
-                                  client={client}
-                                  showClient={false}
-                                  nested
-                                  onView={setSelectedContract}
-                                  onDownload={previewDownload}
-                                />
-                              ))}
-                          </React.Fragment>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="h-28 text-center text-muted-foreground"
-                        >
-                          No clients found.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </>
-              ) : (
-                <>
-                  <TableHeader>
+                          {isExpanded &&
+                            clientContracts.map((contract) => (
+                              <ContractRow
+                                key={contract.id}
+                                contract={contract}
+                                client={client}
+                                showClient={false}
+                                nested
+                                onView={setSelectedContract}
+                                onDownload={previewDownload}
+                              />
+                            ))}
+                        </React.Fragment>
+                      );
+                    })
+                  ) : (
                     <TableRow>
-                      <TableHead>Contract</TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Term</TableHead>
-                      <TableHead>Rate</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableCell
+                        colSpan={6}
+                        className="h-28 text-center text-muted-foreground"
+                      >
+                        No clients found.
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedContracts.length > 0 ? (
-                      paginatedContracts.map((contract) => (
-                        <ContractRow
-                          key={contract.id}
-                          contract={contract}
-                          client={contractClients.find(
-                            (client) => client.id === contract.clientId,
-                          )}
-                          showClient
-                          onView={setSelectedContract}
-                          onDownload={previewDownload}
-                        />
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={7}
-                          className="h-28 text-center text-muted-foreground"
-                        >
-                          No contracts found.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </>
-              )}
-            </Table>
+                  )}
+                </TableBody>
+              </Table>
+            ) : (
+              <Table className="table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Contract</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Term</TableHead>
+                    <TableHead>Rate</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedContracts.length > 0 ? (
+                    paginatedContracts.map((contract) => (
+                      <ContractRow
+                        key={contract.id}
+                        contract={contract}
+                        client={clientData.find(
+                          (client) => client.id === contract.id,
+                        )}
+                        showClient
+                        onView={setSelectedContract}
+                        onDownload={previewDownload}
+                      />
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="h-28 text-center text-muted-foreground"
+                      >
+                        No contracts found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
 
             <div className="flex flex-col gap-3 px-4 pb-1 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-muted-foreground text-sm">

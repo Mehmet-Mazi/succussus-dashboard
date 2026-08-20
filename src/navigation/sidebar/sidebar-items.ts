@@ -92,7 +92,6 @@ export const sidebarItems: NavGroup[] = [
         title: "Contracts",
         url: "/dashboard/contracts",
         icon: FileText,
-        badge: "soon",
       },
       {
         id: "dashboard",
@@ -204,12 +203,14 @@ export const sidebarItems: NavGroup[] = [
         title: "Users",
         url: "/dashboard/users",
         icon: Users,
+        badge: "soon"
       },
       {
         id: "roles",
         title: "Roles",
         url: "/dashboard/roles",
         icon: Lock,
+        badge: "soon"
       },
       {
         id: "authentication",

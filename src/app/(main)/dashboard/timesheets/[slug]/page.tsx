@@ -48,7 +48,11 @@ export default async function TimesheetSubmissionPage({
         </Button>
         <div className="flex gap-3 ">
           <Button asChild variant={"default"} size={"sm"}>
-            <Link href={timesheets.file_url}>
+            <Link
+              href={timesheets.file_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <File />
               Original File
             </Link>

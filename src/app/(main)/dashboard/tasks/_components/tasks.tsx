@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { columns } from "./columns";
 import type { Task } from "./data";
 import { TasksToolbar } from "./tasks-toolbar";
+import { Card } from "@/components/ui/card";
 
 interface TasksProps {
   data: Task[];
@@ -92,7 +93,7 @@ export function Tasks({ data }: TasksProps) {
   const canNextPage = table.getCanNextPage();
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
+    <Card className="overflow-hidden rounded-xl border border-border/70">
       <div className="border-b px-4 py-4">
         <TasksToolbar table={table} />
       </div>
@@ -244,6 +245,6 @@ export function Tasks({ data }: TasksProps) {
           </Pagination>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

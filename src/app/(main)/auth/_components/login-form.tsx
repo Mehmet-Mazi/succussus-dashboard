@@ -225,76 +225,10 @@ export function LoginForm() {
           : "Login"}
       </Button>
       <p className="text-center text-muted-foreground text-xs">
-      Don&apos;t have an account?{" "}
-        <Link
-          prefetch={false}
-          href="/auth/v1/register"
-          className="text-primary"
-        >
-          Register
-        </Link>
+        Don&apos;t have an account?{" "}
+        Contact your admin.
       </p>
 
-    <fieldset className="space-y-2 border-t pt-4">
-      <legend className="font-medium text-sm">
-        Authentication Mode
-      </legend>
-
-      <Controller
-        control={form.control}
-        name="authMode"
-        render={({ field }) => (
-          <RadioGroup
-            value={field.value}
-            onValueChange={(value) => {
-              field.onChange(value);
-              form.clearErrors("root");
-            }}
-            className="grid gap-2 sm:grid-cols-2"
-          >
-            <label
-              htmlFor="auth-mode-api"
-              className="flex cursor-pointer items-start gap-3 rounded-lg border p-3"
-            >
-              <RadioGroupItem
-                id="auth-mode-api"
-                value="api"
-                className="mt-0.5"
-              />
-
-              <span className="space-y-1">
-                <span className="block font-medium text-sm">
-                  Live API
-                </span>
-                <span className="block text-muted-foreground text-xs">
-                  Authenticate with API.
-                </span>
-              </span>
-            </label>
-
-            <label
-              htmlFor="auth-mode-mock"
-              className="flex cursor-pointer items-start gap-3 rounded-lg border p-3"
-            >
-              <RadioGroupItem
-                id="auth-mode-mock"
-                value="mock"
-                className="mt-0.5"
-              />
-
-              <span className="space-y-1">
-                <span className="block font-medium text-sm">
-                  Local Test
-                </span>
-                <span className="block text-muted-foreground text-xs">
-                  Use offline test accounts.
-                </span>
-              </span>
-            </label>
-          </RadioGroup>
-        )}
-      />
-    </fieldset>
     </form>
   );
 }

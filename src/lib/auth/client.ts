@@ -7,7 +7,7 @@ const API_URL = process.env.API_URL!;
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
-): Promise<T> {
+): Promise<T | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token")?.value;
 
@@ -35,6 +35,9 @@ export async function apiFetch<T>(
 
     // 2. Throw the enhanced custom error
     throw new HttpError(response.status, errorData);
+  }
+  if (response.status === 204) {
+    return null;
   }
 
   return response.json();

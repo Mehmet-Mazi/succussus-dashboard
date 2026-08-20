@@ -1,5 +1,13 @@
+import { apiFetch } from "@/lib/auth/client";
 import { ContractVault } from "./_components/contract-vault";
+import { ClientRecord } from "./_components/contract-data";
 
-export default function ContractsPage() {
-  return <ContractVault />;
+async function getContracts() {
+  const response = await apiFetch<ClientRecord[]>("/api/dashboard/contracts/")
+  return response
+}
+
+export default async function ContractsPage() {
+  const data = await getContracts() ?? [];
+  return <ContractVault clientData={data} />;
 }

@@ -244,7 +244,10 @@ export default function DriverTimesheets({
                         asChild
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Link href={submission.invoice_url}>
+                        <Link
+                          href={submission.invoice_url}
+                          target="_blank"
+                          rel="noopener noreferrer">
                           <Download />
                           View Invoice
                         </Link>
@@ -265,6 +268,6 @@ export default function DriverTimesheets({
           })}
         </Accordion>
       </CardContent>
-    </Card>
+    </Card >
   );
 }

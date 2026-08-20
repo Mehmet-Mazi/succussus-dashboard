@@ -12,9 +12,10 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import PostcodeTable, { PostcodeRate } from "./postcode-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { Settings } from "lucide-react";
+import isObject from "lodash/isObject";
 
 interface FixedFields {
   fuelPerStop: number;
@@ -50,6 +51,36 @@ interface ChangedFields {
     after: number;
   };
   postcodeRates?: PostcodeChanges;
+}
+
+export function getDeepDifferences(baseObj: any, comparisonObj: any): any {
+  // If either isn't an object, or they are identical, return nothing
+  if (!isObject(baseObj) || !isObject(comparisonObj)) return {};
+  if (isEqual(baseObj, comparisonObj)) return {};
+
+  const changes: any = {};
+
+  // Loop through all keys in the modified object
+  Object.keys(comparisonObj).forEach((key) => {
+    const baseValue = baseObj[key];
+    const compValue = comparisonObj[key];
+
+    // 1. If values are exactly equal, skip it
+    if (isEqual(baseValue, compValue)) return;
+
+    // 2. If both are objects (and not arrays), recursively find nested changes
+    if (isObject(baseValue) && isObject(compValue) && !Array.isArray(baseValue) && !Array.isArray(compValue)) {
+      const nestedChanges = getDeepDifferences(baseValue, compValue);
+      if (Object.keys(nestedChanges).length > 0) {
+        changes[key] = nestedChanges;
+      }
+    } else {
+      // 3. Otherwise, it's a primitive, array, or new key—grab the modified value
+      changes[key] = compValue;
+    }
+  });
+
+  return changes;
 }
 
 function getChangedFields(
@@ -133,47 +164,19 @@ function getChangedFields(
   return changes;
 }
 
-function getPostcodeRates(): PostcodeRate[] {
-  return [
-    {
-      id: "1",
-      date: "24/12/2026",
-      postcode: "ME",
-      rate: 20,
-    },
-    {
-      id: "2",
-      date: "24/12/2026",
-      postcode: "MEs",
-      rate: 20,
-    },
-    {
-      id: "3",
-      date: "24/12/2026",
-      postcode: "MEx",
-      rate: 20,
-    },
-    {
-      id: "4",
-      date: "24/12/2026",
-      postcode: "MEb",
-      rate: 20,
-    },
-  ];
-}
 
 export default function Rules() {
   const [open, setOpen] = useState(false);
   const [showChanges, setShowChanges] = useState(false);
   const [originalItems, setOriginalItems] = useState<EditableType>({
-    postcodeRates: getPostcodeRates(),
+    postcodeRates: [],
     fuelPerStop: 0.4,
     incentivePerStop: 0.2,
     vanDeduction: 0.4,
   });
 
   const [visibleItems, setVisibleItems] = useState<EditableType>({
-    postcodeRates: getPostcodeRates(),
+    postcodeRates: [],
     fuelPerStop: 0.4,
     incentivePerStop: 0.2,
     vanDeduction: 0.4,
@@ -197,8 +200,15 @@ export default function Rules() {
     }
   };
 
-  const submitChanges = () => {
+  const submitChanges = async () => {
     const result = getChangedFields(originalItems, visibleItems);
+    const diff = getDeepDifferences(originalItems, visibleItems)
+    console.log(diff)
+    const response = await fetch("/api/timesheets/rules", {
+      method: "POST",
+      body: JSON.stringify(diff),
+    })
+
     if (Object.keys(result).length > 0) {
       // UPDATE OGIRINAL ITEM
       cancelHandler();
@@ -211,6 +221,26 @@ export default function Rules() {
     setChangedItems({});
     setVisibleItems(originalItems);
   };
+
+  useEffect(() => {
+    const getSavedRules = async () => {
+      const response = await fetch("/api/timesheets/rules")
+      const result = await response.json()
+      setOriginalItems({
+        postcodeRates: result.postcodes,
+        fuelPerStop: result.fuel_allowance,
+        incentivePerStop: result.stop_incentive,
+        vanDeduction: result.van_deduction,
+      })
+      setVisibleItems({
+        postcodeRates: result.postcodes,
+        fuelPerStop: result.fuel_allowance,
+        incentivePerStop: result.stop_incentive,
+        vanDeduction: result.van_deduction,
+      })
+    }
+    getSavedRules()
+  }, [])
 
   return (
     <Dialog
@@ -238,22 +268,40 @@ export default function Rules() {
             </DialogHeader>
             {changes.fuelPerStop && (
               <p>
-                Fuel per stop: {changes.fuelPerStop.before} →{" "}
-                {changes.fuelPerStop.after}
+                Fuel per stop: {" "}
+                <span className="font-bold text-destructive">
+                  £{changes.fuelPerStop.before}
+                </span> {" "}
+                →{" "}
+                <span className="font-bold text-green-500">
+                  £{changes.fuelPerStop.after}
+                </span>
               </p>
             )}
 
             {changes.incentivePerStop && (
               <p>
-                Incentive per stop: {changes.incentivePerStop.before} →{" "}
-                {changes.incentivePerStop.after}
+                Incentive per stop:{" "}
+                <span className="font-bold text-destructive">
+                  £{changes.incentivePerStop.before}
+                </span> {" "}
+                →{" "}
+                <span className="font-bold text-green-500">
+                  £{changes.incentivePerStop.after}
+                </span>
               </p>
             )}
 
             {changes.vanDeduction && (
               <p>
-                Van deduction: {changes.vanDeduction.before} →{" "}
-                {changes.vanDeduction.after}
+                Van deduction: {" "}
+                <span className="font-bold text-destructive">
+                  £{changes.vanDeduction.before}
+                </span> {" "}
+                →{" "}
+                <span className="font-bold text-green-500">
+                  £{changes.vanDeduction.after}
+                </span>
               </p>
             )}
 
@@ -294,37 +342,55 @@ export default function Rules() {
                   )}
 
                   {changes.postcodeRates.added.length > 0 && (
-                    <div className="border w-fit p-3 rounded-md mt-3">
-                      <h4>Added</h4>
+                    changes.postcodeRates.added.map((rate) => (
+                      <div key={rate.id} className="border w-fit p-3 rounded-md mt-3">
+                        <h4>Added</h4>
 
-                      {changes.postcodeRates.added.map((rate) => (
-                        <div key={rate.id}>
-                          <p className="text-green-500">
-                            {rate.postcode} — {rate.rate}
-                          </p>
+                        <div >
+                          <div>
+                            Effective From: {" "}
+                            <p className="inline text-green-500">
+                              {rate.effective_from}
+                            </p>
+                          </div>
+                          <div>
+                            Postcoded: {" "}
+                            <p className="inline text-green-500">
+                              {rate.postcode}
+                            </p>
+                          </div>
+                          <div>
+                            Rate:{" "}
+                            <p className="inline text-green-500">
+                              £{rate.rate}
+                            </p>
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))
                   )}
 
                   {changes.postcodeRates.deleted.length > 0 && (
-                    <div className="border w-fit p-3 rounded-md mt-3">
-                      <h4>Removed</h4>
+                    changes.postcodeRates.deleted.map((rate) => (
+                      <div className="border w-fit p-3 rounded-md mt-3">
+                        <h4>Removed</h4>
 
-                      {changes.postcodeRates.deleted.map((rate) => (
                         <div key={rate.id}>
                           <p className="text-red-500">
                             {rate.postcode} — {rate.rate}
                           </p>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
             )}
             <DialogFooter>
-              <Button variant={"outline"} onClick={() => setShowChanges(false)}>
+              <Button variant={"outline"} onClick={() => {
+                setShowChanges(false)
+              }}
+              >
                 &larr; back
               </Button>
               <Button type="submit" variant={"default"} onClick={submitChanges}>
@@ -357,11 +423,11 @@ export default function Rules() {
                 <div className="grid gap-4 sm:grid-cols-3 mt-5">
                   <Field>
                     <FieldLabel htmlFor="fuel-field">
-                      Fuel Allowance (p/s)
+                      Fuel Allowance (per stop)
                     </FieldLabel>
                     <Input
                       id="fuel-field"
-                      placeholder="0.40"
+                      value={visibleItems.fuelPerStop}
                       type="number"
                       onChange={(e) =>
                         updateItems({
@@ -372,11 +438,11 @@ export default function Rules() {
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="incentive-field">
-                      Incentive (p/s)
+                      Incentive (per stop)
                     </FieldLabel>
                     <Input
                       id="incentive-field"
-                      placeholder="0.20"
+                      value={visibleItems.incentivePerStop}
                       type="number"
                       onChange={(e) =>
                         updateItems({
@@ -387,11 +453,11 @@ export default function Rules() {
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="van-deduc-field">
-                      Van Deductions
+                      Van Deductions (per day)
                     </FieldLabel>
                     <Input
                       id="van-deduc-field"
-                      placeholder="0.40"
+                      value={visibleItems.vanDeduction}
                       type="number"
                       onChange={(e) =>
                         updateItems({

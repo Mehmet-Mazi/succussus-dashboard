@@ -29,8 +29,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     cookieStore.get(MOCK_ROLE_COOKIE_NAME)?.value,
   );
   const currentUserId = cookieStore.get(
-  MOCK_USER_ID_COOKIE_NAME,
-)?.value;
+    MOCK_USER_ID_COOKIE_NAME,
+  )?.value;
 
   const authMode = cookieStore.get(
     AUTH_MODE_COOKIE_NAME,
@@ -106,7 +106,6 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div className="flex items-center gap-2">
               <LayoutControls />
               <ThemeSwitcher />
-              <GitHubRepositoriesMenu />
               <AccountSwitcher user={currentUser} />
             </div>
           </div>
