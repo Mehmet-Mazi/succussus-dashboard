@@ -19,11 +19,11 @@ export const roleAccess: Record<AppRole, RoleAccess> = {
   director: {
     // allowedRoutes: "all",
     allowedRoutes: [
-      "/dashboard/finances",
+      "/dashboard/finance",
       "/dashboard/analytics",
       "/dashboard/tasks",
       "/dashboard/contracts",
-      "/dashboard/files-manager",
+      "/dashboard/file-manager",
       "/dashboard/users",
       "/dashboard/roles",
       "/dashboard/timesheets",
