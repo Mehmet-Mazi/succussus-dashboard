@@ -16,6 +16,8 @@ import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { Settings } from "lucide-react";
 import isObject from "lodash/isObject";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface FixedFields {
   fuelPerStop: number;
@@ -166,6 +168,7 @@ function getChangedFields(
 
 
 export default function Rules() {
+  const router = useRouter()
   const [open, setOpen] = useState(false);
   const [showChanges, setShowChanges] = useState(false);
   const [originalItems, setOriginalItems] = useState<EditableType>({
@@ -192,6 +195,7 @@ export default function Rules() {
 
   const verifyChanges = () => {
     const result = getChangedFields(originalItems, visibleItems);
+    console.log("changed", result)
     if (Object.keys(result).length > 0) {
       setShowChanges(true);
       setChangedItems(result);
@@ -203,42 +207,45 @@ export default function Rules() {
   const submitChanges = async () => {
     const result = getChangedFields(originalItems, visibleItems);
     const diff = getDeepDifferences(originalItems, visibleItems)
-    console.log(diff)
     const response = await fetch("/api/timesheets/rules", {
       method: "POST",
       body: JSON.stringify(diff),
     })
-
-    if (Object.keys(result).length > 0) {
-      // UPDATE OGIRINAL ITEM
-      cancelHandler();
+    if (!response.ok) {
+      const res = response
+      toast.error(`Failed to save. Please check values.`)
+    } else {
+      toast.success("Successfully updated rules.")
     }
+    await cancelHandler();
   };
 
-  const cancelHandler = () => {
-    setOpen(false);
+  const cancelHandler = async () => {
+    setOpen(false)
     setShowChanges(false);
     setChangedItems({});
-    setVisibleItems(originalItems);
+    await getSavedRules()
   };
 
+  const getSavedRules = async () => {
+    console.log("ping")
+    const response = await fetch("/api/timesheets/rules")
+    const result = await response.json()
+    let postcodes = (result.postcodes as PostcodeRate[]).map((postcode) => ({ ...postcode, fieldId: crypto.randomUUID() }))
+    setOriginalItems({
+      postcodeRates: postcodes,
+      fuelPerStop: result.fuel_allowance,
+      incentivePerStop: result.stop_incentive,
+      vanDeduction: result.van_deduction,
+    })
+    setVisibleItems({
+      postcodeRates: postcodes,
+      fuelPerStop: result.fuel_allowance,
+      incentivePerStop: result.stop_incentive,
+      vanDeduction: result.van_deduction,
+    })
+  }
   useEffect(() => {
-    const getSavedRules = async () => {
-      const response = await fetch("/api/timesheets/rules")
-      const result = await response.json()
-      setOriginalItems({
-        postcodeRates: result.postcodes,
-        fuelPerStop: result.fuel_allowance,
-        incentivePerStop: result.stop_incentive,
-        vanDeduction: result.van_deduction,
-      })
-      setVisibleItems({
-        postcodeRates: result.postcodes,
-        fuelPerStop: result.fuel_allowance,
-        incentivePerStop: result.stop_incentive,
-        vanDeduction: result.van_deduction,
-      })
-    }
     getSavedRules()
   }, [])
 
@@ -341,41 +348,43 @@ export default function Rules() {
                     </div>
                   )}
 
-                  {changes.postcodeRates.added.length > 0 && (
-                    changes.postcodeRates.added.map((rate) => (
-                      <div key={rate.id} className="border w-fit p-3 rounded-md mt-3">
-                        <h4>Added</h4>
+                  <div>
+                    {changes.postcodeRates.added.length > 0 && (
+                      changes.postcodeRates.added.map((rate, id) => (
+                        <div key={id} className="border w-fit p-3 rounded-md mt-3">
+                          <h4>Added</h4>
 
-                        <div >
-                          <div>
-                            Effective From: {" "}
-                            <p className="inline text-green-500">
-                              {rate.effective_from}
-                            </p>
-                          </div>
-                          <div>
-                            Postcoded: {" "}
-                            <p className="inline text-green-500">
-                              {rate.postcode}
-                            </p>
-                          </div>
-                          <div>
-                            Rate:{" "}
-                            <p className="inline text-green-500">
-                              £{rate.rate}
-                            </p>
+                          <div >
+                            <div>
+                              Effective From: {" "}
+                              <p className="inline text-green-500">
+                                {rate.effective_from}
+                              </p>
+                            </div>
+                            <div>
+                              Postcoded: {" "}
+                              <p className="inline text-green-500">
+                                {rate.postcode}
+                              </p>
+                            </div>
+                            <div>
+                              Rate:{" "}
+                              <p className="inline text-green-500">
+                                £{rate.rate}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
-                  )}
+                      ))
+                    )}
+                  </div>
 
                   {changes.postcodeRates.deleted.length > 0 && (
                     changes.postcodeRates.deleted.map((rate) => (
-                      <div className="border w-fit p-3 rounded-md mt-3">
+                      <div className="border w-fit p-3 rounded-md mt-3" key={rate.id}>
                         <h4>Removed</h4>
 
-                        <div key={rate.id}>
+                        <div >
                           <p className="text-red-500">
                             {rate.postcode} — {rate.rate}
                           </p>

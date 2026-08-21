@@ -20,14 +20,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const body = await request.json()
-  console.log(body)
   const djangoBody = {
     ...(body.postcodeRates && {
       postcodes: body.postcodeRates.map(
-        ({ postcode, rate, effective_from }: { postcode: string; rate: number, effective_from: string }) => ({
+        ({ postcode, rate, effective_from, id }: { id?: number; postcode: string; rate: number, effective_from: string }) => ({
           postcode,
           rate,
-          effective_from
+          id,
         }),
       ),
     }),
@@ -45,14 +44,19 @@ export async function POST(request: Request) {
     }),
   }
 
-  console.log("post", djangoBody)
-  const response = await apiFetch(`/api/dashboard/timesheets/configs/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(djangoBody),
-  })
+  let response;
+  try {
 
-  return Response.json(response);
+    response = await apiFetch(`/api/dashboard/timesheets/configs/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(djangoBody),
+    })
+    return Response.json(response);
+  } catch (exception) {
+    console.log("exception", exception)
+    return Response.json(response)
+  }
 }

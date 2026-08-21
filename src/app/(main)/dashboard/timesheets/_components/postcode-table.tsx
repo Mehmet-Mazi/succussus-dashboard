@@ -16,7 +16,8 @@ import { format } from "date-fns";
 import { enGB } from "date-fns/locale";
 
 export type PostcodeRate = {
-  id: string;
+  fieldId: string;
+  id?: string;
   effective_from: string;
   postcode: string;
   rate: string | number;
@@ -57,7 +58,7 @@ export default function PostcodeTable({
     value: Partial<PostcodeRate>,
   ) => {
     const newRates = editPostcode.map((row) =>
-      row.id === postcode.id ? { ...row, ...value } : row,
+      row.fieldId === postcode.fieldId ? { ...row, ...value } : row,
     );
     setEditPostcode(newRates);
     onChange(newRates);
@@ -67,8 +68,8 @@ export default function PostcodeTable({
     const newRates = [
       ...editPostcode,
       {
+        fieldId: crypto.randomUUID(),
         effective_from: format(new Date(), "yyyy-MM-dd"),
-        id: crypto.randomUUID(),
         postcode: "",
         rate: 0,
       },
@@ -106,26 +107,14 @@ export default function PostcodeTable({
         <TableBody className="w-full overflow-auto">
           {editPostcode.length > 0 ? (
             editPostcode.map((postcode, index) => (
-              <TableRow key={postcode.id}>
+              <TableRow key={postcode.fieldId} data-value={postcode.fieldId}>
                 <TableCell className="text-center font-medium overflow-visible">
-                  {editingKey === postcode.id ? (
-                    <CalenderDatePicker
-                      date={postcode.effective_from ? new Date(postcode.effective_from) : undefined}
-                      setDate={(newDate) => {
-                        // 2. Convert the Date object from the calendar back into a 'yyyy-MM-dd' string
-                        if (newDate instanceof Date && !isNaN(newDate.getTime())) {
-                          const stringDate = format(newDate, "yyyy-MM-dd");
-                          inputHandler(postcode, { effective_from: stringDate });
-                        }
-                      }}
-                    />
-                  )
-                    :
-                    postcode.effective_from
+                  {
+                    format(postcode.effective_from, "yyyy-MM-dd")
                   }
                 </TableCell>
                 <TableCell className="text-center font-medium">
-                  {editingKey === postcode.id ? (
+                  {editingKey === postcode.fieldId ? (
                     <Input
                       type="text"
                       onInput={(e) =>
@@ -142,7 +131,7 @@ export default function PostcodeTable({
                   )}
                 </TableCell>
                 <TableCell className="text-center font-medium">
-                  {editingKey === postcode.id ? (
+                  {editingKey === postcode.fieldId ? (
                     <Input
                       type="number"
                       onInput={(e) =>
@@ -159,9 +148,9 @@ export default function PostcodeTable({
                     variant="outline"
                     size={"sm"}
                     className="cursor-pointer"
-                    onClick={() => editHandler(postcode.id)}
+                    onClick={() => editHandler(postcode.fieldId)}
                   >
-                    {editingKey == postcode.id ? (
+                    {editingKey == postcode.fieldId ? (
                       <Check className="text-green-500 font-extrabold" />
                     ) : (
                       <PencilLine />
@@ -174,7 +163,7 @@ export default function PostcodeTable({
                     variant="destructive"
                     size={"sm"}
                     className="cursor-pointer"
-                    onClick={() => deleteRow(postcode.id)}
+                    onClick={() => deleteRow(postcode.fieldId)}
                     disabled
                   >
                     <Trash2 />
