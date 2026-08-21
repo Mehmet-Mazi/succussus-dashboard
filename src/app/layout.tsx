@@ -26,7 +26,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const { theme_mode, theme_preset, content_layout, navbar_style, sidebar_variant, sidebar_collapsible, font } =
     PREFERENCE_DEFAULTS;
 
-  await coldStart()
+  coldStart()
 
   return (
     <html
