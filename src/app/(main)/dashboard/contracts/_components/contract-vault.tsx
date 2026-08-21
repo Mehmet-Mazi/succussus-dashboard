@@ -144,7 +144,6 @@ function ContractRow({
             >
               <span className="truncate">{contract.name}</span>
             </Button>
-            <p className="text-muted-foreground text-xs">{contract.id}</p>
           </div>
         </div>
       </TableCell>
@@ -152,7 +151,7 @@ function ContractRow({
       <TableCell className="text-muted-foreground">
         {formatDate(contract.effective_from)} – {formatDate(contract.effective_to)}
       </TableCell>
-      <TableCell>{contract.name}</TableCell>
+      <TableCell>{contract.service}</TableCell>
       <TableCell className="font-medium tabular-nums">
         £{contract.rate} / {contract.rate_type}
       </TableCell>
@@ -400,7 +399,7 @@ export function ContractVault({ clientData }: { clientData: ClientRecord[] }) {
                             ></TableCell>
                             <TableCell>
                               <Badge variant="secondary">
-                                {activeContracts} active
+                                {client.contracts.length} active
                               </Badge>
                             </TableCell>
                             <TableCell />
