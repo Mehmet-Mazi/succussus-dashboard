@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 type DateRange = { from: Date; to: Date }
 export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }) {
   const router = useRouter()
+  const [fileSelected, setFileSelected] = React.useState("")
   const [date, setDate] = React.useState<DateRange>({
     from: new Date(),
     to: new Date(),
@@ -85,18 +86,47 @@ export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }
                   "border border-dashed bg-muted/30 px-4 py-6 text-center transition-colors hover:bg-muted/50"
                 }
               >
-                <span
-                  className={
-                    "flex size-10 items-center justify-center rounded-lg bg-background " +
-                    "ring-1 ring-foreground/10"
-                  }
-                >
-                  <FileUp className="size-5 text-muted-foreground" />
-                </span>
-                <span className="font-medium text-sm">Choose a contract file</span>
-                <span className="text-muted-foreground text-xs">PNG, JPEG, WebP, and <br /> other common doc formats up to 20 MB</span>
+                {fileSelected ?
+                  (
+                    <>
+                      <span
+                        className={
+                          "flex size-10 items-center justify-center rounded-lg bg-background" +
+                          "ring-1 ring-foreground/10"
+                        }
+                      >
+                        <FileUp className="size-5 text-green-500" />
+                      </span>
+                      <span className="font-medium text-sm">{fileSelected}</span>
+                    </>
+                  )
+                  :
+                  (
+                    <>
+                      <span
+                        className={
+                          "flex size-10 items-center justify-center rounded-lg bg-background " +
+                          "ring-1 ring-foreground/10"
+                        }
+                      >
+                        <FileUp className="size-5 text-muted-foreground" />
+                      </span>
+                      <span className="font-medium text-sm">Choose a contract file</span>
+                      <span className="text-muted-foreground text-xs">PNG, JPEG, WebP, and <br /> other common doc formats up to 20 MB</span>
+                    </>
+                  )
+                }
               </label>
-              <Input id="contract-file" type="file" accept=".png,.jpg,.webp, .pdf, .docx, .doc" className="sr-only" name="file" />
+              <Input
+                id="contract-file"
+                type="file"
+                accept=".png,.jpg,.webp, .pdf, .docx, .doc"
+                className="sr-only"
+                name="file"
+                onChange={(event) => {
+                  if (event.currentTarget.files) setFileSelected(event.currentTarget.files[0].name)
+                  else setFileSelected("")
+                }} />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
