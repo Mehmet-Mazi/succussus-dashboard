@@ -78,6 +78,7 @@ export default function AddDeduction({
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("submit")
     const formData = new FormData(e.currentTarget);
     formData.append("category", ADJUSTMENTTYPE[formData.get("type")][1]);
     try {

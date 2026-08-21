@@ -110,6 +110,7 @@ export const sidebarItems: NavGroup[] = [
         title: "Finance",
         url: "/dashboard/finance",
         icon: Banknote,
+        badge: "soon",
       },
       {
         id: "analytics",

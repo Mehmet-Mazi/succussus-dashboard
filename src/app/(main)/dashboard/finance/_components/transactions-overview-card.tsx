@@ -93,7 +93,7 @@ export function TransactionsOverviewCard() {
       </CardHeader>
 
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-50 w-full">
+        <ChartContainer config={chartConfig} className="h-44 w-full">
           <LineChart accessibilityLayer data={chartData} margin={{ bottom: 0, left: 0, right: 0, top: 0 }}>
             <CartesianGrid vertical={false} />
             <XAxis

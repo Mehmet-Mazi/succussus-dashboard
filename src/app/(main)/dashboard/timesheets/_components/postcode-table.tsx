@@ -175,6 +175,7 @@ export default function PostcodeTable({
                     size={"sm"}
                     className="cursor-pointer"
                     onClick={() => deleteRow(postcode.id)}
+                    disabled
                   >
                     <Trash2 />
                   </Button>

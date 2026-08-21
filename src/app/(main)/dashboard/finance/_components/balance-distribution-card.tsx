@@ -18,25 +18,25 @@ const balanceData: {
   percentage: number;
 }[] = [
     {
-      account: "Main Wallet",
+      account: "Profit",
       amount: 122_540,
       key: "main",
       percentage: 52.2,
     },
     {
-      account: "Savings Account",
+      account: "Stop Payments",
       amount: 48_320,
       key: "savings",
       percentage: 20.6,
     },
     {
-      account: "Investment Account",
+      account: "Total Fuel Allowance",
       amount: 36_780,
       key: "investment",
       percentage: 15.7,
     },
     {
-      account: "Reserve Account",
+      account: "Incentives",
       amount: 27_256,
       key: "reserve",
       percentage: 11.5,
@@ -91,7 +91,7 @@ export function BalanceDistributionCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Account Allocation</CardTitle>
+        <CardTitle className="font-normal">Account Split</CardTitle>
         <CardAction>
           <Select onValueChange={(value) => setCurrency(value as Currency)} value={currency}>
             <SelectTrigger className="w-36" size="sm">

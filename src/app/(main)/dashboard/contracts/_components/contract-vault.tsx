@@ -390,7 +390,7 @@ export function ContractVault({ clientData }: { clientData: ClientRecord[] }) {
                                   {client.account_name}
                                 </span>
                                 <span className="text-muted-foreground text-xs">
-                                  {allClientContracts.length} contracts
+                                  {client.contracts.length} contracts
                                 </span>
                               </Button>
                             </TableCell>
@@ -407,7 +407,7 @@ export function ContractVault({ clientData }: { clientData: ClientRecord[] }) {
                           </TableRow>
 
                           {isExpanded &&
-                            clientContracts.map((contract) => (
+                            client.contracts.map((contract) => (
                               <ContractRow
                                 key={contract.id}
                                 contract={contract}

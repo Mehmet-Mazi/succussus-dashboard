@@ -24,6 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { times } from "lodash";
 import { Download, FilePlus } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -52,6 +53,7 @@ export default function DriverTimesheets({
   const router = useRouter();
   const params = useParams<{ slug: string }>();
   const uuid = params.slug;
+  const [isInvoiced, setIsInvoiced] = useState(false)
   const [open, setOpen] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10); // UNIMPLEMENTED
@@ -104,7 +106,6 @@ export default function DriverTimesheets({
       error: "Something went wrong. Please try again later.",
     });
   }
-
   async function generateInvoiceRequest(driver_id: string) {
     const body = JSON.stringify({
       timesheet_batch_id: uuid,

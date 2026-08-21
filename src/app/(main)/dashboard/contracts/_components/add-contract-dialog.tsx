@@ -102,16 +102,20 @@ export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="contract-client">Client</FieldLabel>
-                <Select name="client">
+                <Select defaultValue={clientData[2].id} name="client">
                   <SelectTrigger id="contract-client" className="w-full">
-                    <SelectValue placeholder="Select a client" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {clientData.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.account_name}
-                      </SelectItem>
-                    ))}
+                    {clientData.map((client) => {
+                      console.log(client)
+                      return (
+
+                        < SelectItem key={client.id} value={"" + client.id} >
+                          {client.account_name}
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               </Field>
@@ -133,7 +137,7 @@ export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }
 
               <Field>
                 <FieldLabel htmlFor="contract-service">Service</FieldLabel>
-                <Input placeholder="O/N, ECON..." name="name" />
+                <Input placeholder="O/N, ECON..." />
               </Field>
 
               <div className="grid grid-cols-[1fr_8rem] gap-2">
@@ -169,7 +173,7 @@ export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 }
 

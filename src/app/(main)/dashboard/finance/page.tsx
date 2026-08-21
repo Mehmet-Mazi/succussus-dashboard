@@ -55,14 +55,13 @@ export default function Page() {
             </div>
 
             <div className="flex flex-col gap-4 xl:col-span-6">
-              <IncomeBreakdown />
-              <FinanceNotification />
+              <TransactionsOverviewCard />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
             <div className="xl:col-span-7">
-              <TransactionsOverviewCard />
+              <TrafficSources />
             </div>
             <div className="xl:col-span-5">
               <BalanceDistributionCard />
@@ -70,7 +69,6 @@ export default function Page() {
           </div>
 
           <div>
-            <TrafficSources />
           </div>
           <div className="hidden grid-cols-1 gap-4 xl:grid-cols-12">
             <div className="xl:col-span-4">

@@ -11,35 +11,49 @@ import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 const trafficSources = [
   {
     name: "Wickes",
-    visits: "5,640",
+    visits: "£5,640",
     share: 38,
     change: "+18%",
     icon: siMeta,
   },
   {
     name: "Fraser House",
-    visits: "3,740",
+    visits: "£3,740",
     share: 25,
     change: "-6%",
     icon: siGoogle,
   },
   {
     name: "Shopify",
-    visits: "2,960",
+    visits: "£2,960",
     share: 20,
     change: "+7%",
     icon: siShopify,
   },
   {
     name: "TikTok",
-    visits: "1,340",
+    visits: "£1,340",
     share: 10,
     change: "+9%",
     icon: siTiktok,
   },
   {
     name: "eBay",
-    visits: "1,080",
+    visits: "£1,080",
+    share: 7,
+    change: "-3%",
+    icon: siEbay,
+  },
+  {
+    name: "eBay",
+    visits: "£1,080",
+    share: 7,
+    change: "-3%",
+    icon: siEbay,
+  },
+  {
+    name: "eBay",
+    visits: "£1,080",
     share: 7,
     change: "-3%",
     icon: siEbay,
@@ -170,7 +184,7 @@ export function TrafficSources() {
       </CardHeader>
 
       <CardContent>
-        <ChartContainer config={trafficSourcesConfig} className="h-54 w-full">
+        <ChartContainer config={trafficSourcesConfig} className="h-80 w-full">
           <BarChart
             accessibilityLayer
             barCategoryGap={12}
