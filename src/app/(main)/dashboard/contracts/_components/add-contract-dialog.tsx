@@ -102,7 +102,7 @@ export function AddContractDialog({ clientData }: { clientData: ClientRecord[] }
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="contract-client">Client</FieldLabel>
-                <Select defaultValue={clientData[2].id} name="client">
+                <Select defaultValue={clientData[1]?.id} name="client">
                   <SelectTrigger id="contract-client" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
